@@ -1,12 +1,23 @@
+'use client';
+
 import Link from "next/link";
 import SearchBar from "./SearchBar";
 import ThemeToggle from "./ThemeToggle";
+import UserMenu from "./UserMenu";
+import AuthModal from "./AuthModal";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { useState } from "react";
+import { LogIn } from "lucide-react";
 
 interface HeaderProps {
   currentPage?: string;
 }
 
 export default function Header({ currentPage = "home" }: HeaderProps) {
+  const { isAuthenticated, user } = useAuth();
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  
   const navItems = [
     { href: "/", label: "首页", key: "home" },
     { href: "/articles", label: "文章", key: "articles" },
@@ -46,10 +57,31 @@ export default function Header({ currentPage = "home" }: HeaderProps) {
               
               {/* 主题切换按钮 */}
               <ThemeToggle />
+              
+              {/* 用户菜单或登录按钮 */}
+              {isAuthenticated ? (
+                <UserMenu />
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsAuthModalOpen(true)}
+                  className="flex items-center gap-2"
+                >
+                  <LogIn className="h-4 w-4" />
+                  登录
+                </Button>
+              )}
             </div>
           </div>
         </div>
       </div>
+      
+      {/* 认证模态框 */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+      />
     </nav>
   );
 }

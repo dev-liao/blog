@@ -2,6 +2,110 @@
 
 本文档记录了 Next.js 博客项目的所有重要变更。
 
+## [1.3.0] - 2025-09-13
+
+### 🎉 1.3版本发布
+
+这是 Next.js 博客项目的第三个功能更新版本，新增了完整的用户认证系统、文章编辑功能和管理后台，实现了从内容消费到内容创作的完整闭环。
+
+### ✨ 新增功能
+
+#### 用户认证系统
+- **用户注册/登录** - 完整的用户注册和登录功能
+- **密码管理** - 密码显示/隐藏切换，密码强度验证
+- **会话管理** - 用户登录状态持久化和管理
+- **用户资料** - 个人资料页面，支持信息编辑
+- **权限控制** - 基于角色的访问控制（普通用户/管理员）
+
+#### 文章编辑功能
+- **富文本编辑器** - 支持Markdown格式的文章编辑器
+- **实时预览** - 编辑和预览模式切换
+- **标签管理** - 动态添加和删除文章标签
+- **草稿保存** - 支持文章草稿保存功能
+- **文章管理** - 我的文章页面，支持编辑和删除
+
+#### 管理后台
+- **仪表板** - 数据统计和概览
+- **文章管理** - 所有文章的集中管理界面
+- **用户管理** - 用户信息管理（基础功能）
+- **权限控制** - 仅管理员可访问的后台功能
+
+#### 个人中心
+- **我的文章** - 用户创建的文章列表和管理
+- **我的收藏** - 收藏文章的管理和查看
+- **个人资料** - 用户信息编辑和查看
+
+### 🛠️ 技术改进
+
+#### 认证系统
+- **AuthContext** - 全局认证状态管理
+- **AuthService** - 认证服务类，处理登录/注册逻辑
+- **路由保护** - 基于认证状态的页面访问控制
+- **用户菜单** - 用户头像和下拉菜单组件
+
+#### UI组件
+- **Dialog组件** - 模态框组件，用于登录/注册
+- **DropdownMenu组件** - 下拉菜单组件
+- **Avatar组件** - 用户头像组件
+- **Alert组件** - 消息提示组件
+
+#### 页面结构
+- **动态路由** - 文章编辑页面的动态路由
+- **权限检查** - 页面级别的权限验证
+- **重定向处理** - 未授权用户的页面重定向
+
+### 📁 新增文件
+
+#### 认证相关
+- `src/lib/auth.ts` - 认证服务和类型定义
+- `src/contexts/AuthContext.tsx` - 认证上下文提供者
+- `src/components/LoginForm.tsx` - 登录表单组件
+- `src/components/RegisterForm.tsx` - 注册表单组件
+- `src/components/AuthModal.tsx` - 认证模态框组件
+- `src/components/UserMenu.tsx` - 用户菜单组件
+
+#### 文章编辑
+- `src/components/ArticleEditor.tsx` - 文章编辑器组件
+- `src/app/articles/new/page.tsx` - 新建文章页面
+- `src/app/articles/[slug]/edit/page.tsx` - 编辑文章页面
+
+#### 用户页面
+- `src/app/profile/page.tsx` - 个人资料页面
+- `src/app/my-articles/page.tsx` - 我的文章页面
+- `src/app/favorites/page.tsx` - 我的收藏页面
+- `src/app/admin/page.tsx` - 管理后台页面
+
+#### UI组件
+- `src/components/ui/dialog.tsx` - Dialog组件
+- `src/components/ui/dropdown-menu.tsx` - DropdownMenu组件
+- `src/components/ui/avatar.tsx` - Avatar组件
+- `src/components/ui/alert.tsx` - Alert组件
+
+### 🔧 配置更新
+
+#### 依赖管理
+- 添加 `@radix-ui/react-dialog` - 模态框组件
+- 添加 `@radix-ui/react-dropdown-menu` - 下拉菜单组件
+- 添加 `@radix-ui/react-avatar` - 头像组件
+
+#### 布局更新
+- 更新 `src/app/layout.tsx` - 集成AuthProvider和全局布局
+- 更新 `src/components/Header.tsx` - 集成认证功能
+
+### 🐛 问题修复
+
+#### 认证相关
+- 修复未登录用户访问受保护页面的问题
+- 修复认证状态在页面刷新后的持久化问题
+- 修复用户权限检查的逻辑问题
+
+#### UI/UX改进
+- 优化登录/注册表单的用户体验
+- 改进错误消息的显示和提示
+- 优化移动端的响应式设计
+
+---
+
 ## [1.2.0] - 2025-09-13
 
 ### 🎉 1.2版本发布
