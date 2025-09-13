@@ -151,7 +151,7 @@ export default function MyArticlesPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleDeleteArticle(article.id)}
+                        onClick={() => handleDeleteArticle(article.id.toString())}
                         className="text-destructive hover:text-destructive"
                       >
                         <Trash2 className="h-4 w-4" />
