@@ -504,3 +504,34 @@ export function getArticlesByTag(tag: string): Article[] {
     article.tags.some(articleTag => articleTag.toLowerCase() === tag.toLowerCase())
   );
 }
+
+// 获取所有文章（包括预设文章和用户创建的文章）
+export function getAllArticles(): Article[] {
+  if (typeof window === 'undefined') {
+    // 服务端渲染时只返回预设文章
+    return articles;
+  }
+
+  try {
+    const stored = localStorage.getItem('userArticles');
+    if (!stored) return articles;
+    
+    const userArticles: Article[] = JSON.parse(stored);
+    return [...articles, ...userArticles];
+  } catch (error) {
+    console.error('Error loading user articles:', error);
+    return articles;
+  }
+}
+
+// 根据slug获取文章（包括用户创建的文章）
+export function getArticleBySlug(slug: string): Article | null {
+  const allArticles = getAllArticles();
+  return allArticles.find(article => article.slug === slug) || null;
+}
+
+// 根据ID获取文章（包括用户创建的文章）
+export function getArticleById(id: number): Article | null {
+  const allArticles = getAllArticles();
+  return allArticles.find(article => article.id === id) || null;
+}
