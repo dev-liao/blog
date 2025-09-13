@@ -15,7 +15,7 @@ interface HeaderProps {
 }
 
 export default function Header({ currentPage = "home" }: HeaderProps) {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   
   const navItems = [
