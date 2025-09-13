@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { notFound } from 'next/navigation';
@@ -10,13 +10,14 @@ import { Loader2 } from 'lucide-react';
 import { getArticleBySlug, Article } from '@/lib/articles';
 
 interface EditArticlePageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 
 export default function EditArticlePage({ params }: EditArticlePageProps) {
+  const resolvedParams = use(params);
   const { isAuthenticated, user, isLoading } = useAuth();
   const router = useRouter();
   const [article, setArticle] = useState<Article | null>(null);
@@ -31,7 +32,7 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
 
     if (isAuthenticated) {
       // 获取文章数据
-      const articleData = getArticleBySlug(params.slug);
+      const articleData = getArticleBySlug(resolvedParams.slug);
       if (!articleData) {
         notFound();
       }
@@ -45,7 +46,7 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
       setArticle(articleData);
       setLoading(false);
     }
-  }, [isAuthenticated, isLoading, params.slug, user, router]);
+  }, [isAuthenticated, isLoading, resolvedParams.slug, user, router]);
 
   if (isLoading || loading) {
     return (
