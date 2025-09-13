@@ -73,7 +73,7 @@ export default function FavoritesPage() {
           const favoriteIds = JSON.parse(favorites);
           const updatedFavorites = favoriteIds.filter((id: string) => id !== articleId);
           localStorage.setItem('favoriteArticles', JSON.stringify(updatedFavorites));
-          setFavoriteArticles(prev => prev.filter(article => article.id !== articleId));
+          setFavoriteArticles(prev => prev.filter(article => article.id.toString() !== articleId));
         } catch (error) {
           console.error('Error updating favorites:', error);
         }
@@ -138,7 +138,7 @@ export default function FavoritesPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleRemoveFavorite(article.id)}
+                      onClick={() => handleRemoveFavorite(article.id.toString())}
                       className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
                     >
                       <Heart className="h-4 w-4 fill-current" />
