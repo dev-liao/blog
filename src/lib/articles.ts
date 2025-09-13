@@ -473,7 +473,8 @@ React 19 是一个重要的版本更新，建议开发者提前了解新特性�
 ];
 
 export function getArticleBySlug(slug: string): Article | undefined {
-  return articles.find(article => article.slug === slug);
+  const allArticles = getAllArticles();
+  return allArticles.find(article => article.slug === slug);
 }
 
 export function getFeaturedArticles(): Article[] {
@@ -524,14 +525,3 @@ export function getAllArticles(): Article[] {
   }
 }
 
-// 根据slug获取文章（包括用户创建的文章）
-export function getArticleBySlug(slug: string): Article | null {
-  const allArticles = getAllArticles();
-  return allArticles.find(article => article.slug === slug) || null;
-}
-
-// 根据ID获取文章（包括用户创建的文章）
-export function getArticleById(id: number): Article | null {
-  const allArticles = getAllArticles();
-  return allArticles.find(article => article.id === id) || null;
-}
