@@ -7,6 +7,7 @@ import ArticleEditor from '@/components/ArticleEditor';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
 import { Article } from '@/lib/articles';
+import { ArticleService } from '@/lib/articleService';
 
 export default function NewArticlePage() {
   const { isAuthenticated, user, isLoading } = useAuth();
@@ -41,15 +42,24 @@ export default function NewArticlePage() {
     setIsSaving(true);
     
     try {
-      // 模拟API调用
+      if (!user) {
+        return { 
+          success: false, 
+          error: '用户未登录' 
+        };
+      }
+
+      // 模拟API调用延迟
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // 在实际应用中，这里会调用API保存文章
-      console.log('Saving article:', articleData);
+      // 实际保存文章到localStorage
+      const savedArticle = ArticleService.saveArticle(articleData, user.id);
       
-      // 模拟成功响应
+      console.log('Article saved:', savedArticle);
+      
       return { success: true };
     } catch (error) {
+      console.error('Error saving article:', error);
       return { 
         success: false, 
         error: '保存文章时发生错误，请重试' 
@@ -73,6 +83,7 @@ export default function NewArticlePage() {
       <ArticleEditor
         onSave={handleSave}
         onCancel={handleCancel}
+        onSaveSuccess={handleSaveSuccess}
       />
     </div>
   );

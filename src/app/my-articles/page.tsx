@@ -8,7 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, Plus, Edit, Trash2, Eye, Calendar, Tag } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { articles, Article } from '@/lib/articles';
+import { Article } from '@/lib/articles';
+import { ArticleService } from '@/lib/articleService';
 
 export default function MyArticlesPage() {
   const { isAuthenticated, user, isLoading } = useAuth();
@@ -22,19 +23,18 @@ export default function MyArticlesPage() {
   }, [isAuthenticated, isLoading]);
 
   useEffect(() => {
-    // 模拟获取用户文章
+    // 获取用户文章
     const fetchMyArticles = async () => {
       setLoading(true);
-      // 模拟API调用
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // 模拟API调用延迟
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      // 这里应该根据用户ID获取文章，现在使用模拟数据
-      // 在实际应用中，这里会调用API获取该用户的文章
-      const userArticles = articles.filter(article => 
-        article.author === (user?.name || '')
-      );
+      if (user) {
+        // 从ArticleService获取用户文章
+        const userArticles = ArticleService.getUserArticles(user.id);
+        setMyArticles(userArticles);
+      }
       
-      setMyArticles(userArticles);
       setLoading(false);
     };
 
@@ -62,8 +62,17 @@ export default function MyArticlesPage() {
       return;
     }
 
-    // 模拟删除文章
-    setMyArticles(prev => prev.filter(article => article.id.toString() !== articleId));
+    if (!user) return;
+
+    const articleIdNum = parseInt(articleId, 10);
+    const success = ArticleService.deleteArticle(articleIdNum, user.id);
+    
+    if (success) {
+      // 更新本地状态
+      setMyArticles(prev => prev.filter(article => article.id.toString() !== articleId));
+    } else {
+      alert('删除文章失败，请重试');
+    }
   };
 
   const formatDate = (dateString: string) => {

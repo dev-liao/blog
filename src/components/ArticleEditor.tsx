@@ -15,9 +15,10 @@ interface ArticleEditorProps {
   article?: Article;
   onSave: (articleData: Partial<Article>) => Promise<{ success: boolean; error?: string }>;
   onCancel: () => void;
+  onSaveSuccess?: () => void;
 }
 
-export default function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps) {
+export default function ArticleEditor({ article, onSave, onCancel, onSaveSuccess }: ArticleEditorProps) {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -70,6 +71,16 @@ export default function ArticleEditor({ article, onSave, onCancel }: ArticleEdit
     
     if (result.success) {
       setMessage({ type: 'success', text: '文章保存成功' });
+      // 如果是新建文章且没有传入onSaveSuccess，延迟跳转
+      if (!article && !onSaveSuccess) {
+        setTimeout(() => {
+          window.location.href = '/my-articles';
+        }, 1500);
+      } else if (onSaveSuccess) {
+        setTimeout(() => {
+          onSaveSuccess();
+        }, 1500);
+      }
     } else {
       setMessage({ type: 'error', text: result.error || '保存失败' });
     }
