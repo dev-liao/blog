@@ -3,8 +3,6 @@
 import { useState, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import TagFilter from "@/components/TagFilter";
 import FavoriteButton from "@/components/FavoriteButton";
 import Link from "next/link";
@@ -41,8 +39,6 @@ export default function Articles() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-      <Header currentPage="articles" />
-
       {/* 主要内容 */}
       <main className="container mx-auto px-4 py-12">
         <div className="max-w-6xl mx-auto">
@@ -112,8 +108,6 @@ export default function Articles() {
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }
