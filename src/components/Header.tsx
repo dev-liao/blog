@@ -1,5 +1,6 @@
 import Link from "next/link";
 import SearchBar from "./SearchBar";
+import ThemeToggle from "./ThemeToggle";
 
 interface HeaderProps {
   currentPage?: string;
@@ -26,20 +27,25 @@ export default function Header({ currentPage = "home" }: HeaderProps) {
             </div>
             
             {/* 导航菜单 */}
-            <div className="flex gap-4 md:gap-6">
-              {navItems.map((item) => (
-                <Link
-                  key={item.key}
-                  href={item.href}
-                  className={`text-sm md:text-base transition-colors ${
-                    currentPage === item.key
-                      ? "text-slate-900 dark:text-white font-medium"
-                      : "text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              ))}
+            <div className="flex items-center gap-4">
+              <div className="flex gap-4 md:gap-6">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.key}
+                    href={item.href}
+                    className={`text-sm md:text-base transition-colors ${
+                      currentPage === item.key
+                        ? "text-slate-900 dark:text-white font-medium"
+                        : "text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+              
+              {/* 主题切换按钮 */}
+              <ThemeToggle />
             </div>
           </div>
         </div>

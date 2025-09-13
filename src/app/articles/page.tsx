@@ -1,11 +1,43 @@
+"use client";
+
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import TagFilter from "@/components/TagFilter";
+import FavoriteButton from "@/components/FavoriteButton";
 import Link from "next/link";
 import { articles } from "@/lib/articles";
 
 export default function Articles() {
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  const filteredArticles = useMemo(() => {
+    if (selectedTags.length === 0) {
+      return articles;
+    }
+    
+    return articles.filter(article =>
+      selectedTags.every(tag =>
+        article.tags.some(articleTag => 
+          articleTag.toLowerCase() === tag.toLowerCase()
+        )
+      )
+    );
+  }, [selectedTags]);
+
+  const handleTagToggle = (tag: string) => {
+    setSelectedTags(prev => 
+      prev.includes(tag) 
+        ? prev.filter(t => t !== tag)
+        : [...prev, tag]
+    );
+  };
+
+  const handleClearAll = () => {
+    setSelectedTags([]);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
@@ -23,9 +55,18 @@ export default function Articles() {
             </p>
           </div>
 
+          {/* 标签筛选 */}
+          <div className="mb-8">
+            <TagFilter
+              selectedTags={selectedTags}
+              onTagToggle={handleTagToggle}
+              onClearAll={handleClearAll}
+            />
+          </div>
+
           {/* 文章列表 */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {articles.map((article) => (
+            {filteredArticles.map((article) => (
               <Link key={article.id} href={`/articles/${article.slug}`}>
                 <Card className="hover:shadow-lg transition-shadow cursor-pointer">
                   <CardHeader>
@@ -47,9 +88,15 @@ export default function Articles() {
                       <span className="text-sm text-slate-500 dark:text-slate-400">
                         {article.date}
                       </span>
-                      <Button variant="ghost" size="sm">
-                        阅读更多 →
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <FavoriteButton 
+                          articleId={article.id} 
+                          articleTitle={article.title}
+                        />
+                        <Button variant="ghost" size="sm">
+                          阅读更多 →
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

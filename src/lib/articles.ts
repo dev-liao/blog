@@ -493,3 +493,14 @@ export function searchArticles(query: string): Article[] {
     article.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))
   );
 }
+
+export function getAllTags(): string[] {
+  const allTags = articles.flatMap(article => article.tags);
+  return Array.from(new Set(allTags)).sort();
+}
+
+export function getArticlesByTag(tag: string): Article[] {
+  return articles.filter(article => 
+    article.tags.some(articleTag => articleTag.toLowerCase() === tag.toLowerCase())
+  );
+}

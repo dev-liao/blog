@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import CommentSection from "@/components/CommentSection";
 import Link from "next/link";
 import { ArrowLeft, Calendar, Clock, User, Tag } from "lucide-react";
 import type { Metadata } from "next";
@@ -148,6 +149,13 @@ export default function ArticlePage({ params }: ArticlePageProps) {
                   __html: article.content.replace(/\n/g, '<br>').replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>').replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/^### (.*$)/gim, '<h3>$1</h3>').replace(/^## (.*$)/gim, '<h2>$1</h2>').replace(/^# (.*$)/gim, '<h1>$1</h1>')
                 }}
               />
+            </CardContent>
+          </Card>
+
+          {/* 评论系统 */}
+          <Card className="mb-8">
+            <CardContent className="pt-6">
+              <CommentSection articleId={article.id} />
             </CardContent>
           </Card>
 

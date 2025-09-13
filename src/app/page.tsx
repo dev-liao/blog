@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import FavoriteButton from "@/components/FavoriteButton";
 import Link from "next/link";
 import { getFeaturedArticles } from "@/lib/articles";
 
@@ -52,9 +53,15 @@ export default function Home() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">
-                      {article.date}
-                    </p>
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-slate-600 dark:text-slate-400">
+                        {article.date}
+                      </p>
+                      <FavoriteButton 
+                        articleId={article.id} 
+                        articleTitle={article.title}
+                      />
+                    </div>
                   </CardContent>
                 </Card>
               </Link>
