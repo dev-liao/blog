@@ -17,21 +17,21 @@ export default function FavoriteButton({ articleId, articleTitle, className }: F
   useEffect(() => {
     setMounted(true);
     // 从localStorage获取收藏状态
-    const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
-    setIsFavorited(favorites.includes(articleId));
+    const favorites = JSON.parse(localStorage.getItem("favoriteArticles") || "[]");
+    setIsFavorited(favorites.includes(articleId.toString()));
   }, [articleId]);
 
   const toggleFavorite = () => {
-    const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+    const favorites = JSON.parse(localStorage.getItem("favoriteArticles") || "[]");
     let newFavorites;
     
     if (isFavorited) {
-      newFavorites = favorites.filter((id: number) => id !== articleId);
+      newFavorites = favorites.filter((id: string) => id !== articleId.toString());
     } else {
-      newFavorites = [...favorites, articleId];
+      newFavorites = [...favorites, articleId.toString()];
     }
     
-    localStorage.setItem("favorites", JSON.stringify(newFavorites));
+    localStorage.setItem("favoriteArticles", JSON.stringify(newFavorites));
     setIsFavorited(!isFavorited);
   };
 
