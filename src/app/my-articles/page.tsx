@@ -64,7 +64,7 @@ export default function MyArticlesPage() {
     }
 
     // 模拟删除文章
-    setMyArticles(prev => prev.filter(article => article.id !== articleId));
+    setMyArticles(prev => prev.filter(article => article.id.toString() !== articleId));
   };
 
   const formatDate = (dateString: string) => {
