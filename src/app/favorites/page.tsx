@@ -35,7 +35,7 @@ export default function FavoritesPage() {
           try {
             const favoriteIds = JSON.parse(favorites);
             const favoriteArticlesList = articles.filter(article => 
-              favoriteIds.includes(article.id)
+              favoriteIds.includes(article.id.toString())
             );
             setFavoriteArticles(favoriteArticlesList);
           } catch (error) {
