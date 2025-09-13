@@ -15,6 +15,13 @@ interface EditArticlePageProps {
   };
 }
 
+export async function generateStaticParams() {
+  const articles = await import("@/lib/articles").then(m => m.articles);
+  return articles.map((article) => ({
+    slug: article.slug,
+  }));
+}
+
 export default function EditArticlePage({ params }: EditArticlePageProps) {
   const { isAuthenticated, user, isLoading } = useAuth();
   const router = useRouter();
