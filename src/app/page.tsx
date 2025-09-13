@@ -31,23 +31,33 @@ export default function Home() {
         {/* 特色文章 */}
         <section className="py-12">
           <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-8 text-center">
-            最新文章
+            精选文章
           </h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <Card key={i} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <CardTitle>文章标题 {i}</CardTitle>
-                  <CardDescription>
-                    这是一篇关于 Next.js 和现代前端开发的精彩文章...
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
-                    2024年1月{i}日 · 5分钟阅读
-                  </p>
-                </CardContent>
-              </Card>
+            {featuredArticles.map((article) => (
+              <Link key={article.id} href={`/articles/${article.slug}`}>
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardHeader>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded">
+                        {article.category}
+                      </span>
+                      <span className="text-sm text-slate-500 dark:text-slate-400">
+                        {article.readTime}
+                      </span>
+                    </div>
+                    <CardTitle>{article.title}</CardTitle>
+                    <CardDescription>
+                      {article.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                      {article.date}
+                    </p>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         </section>

@@ -26,32 +26,34 @@ export default function Articles() {
           {/* 文章列表 */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {articles.map((article) => (
-              <Card key={article.id} className="hover:shadow-lg transition-shadow cursor-pointer">
-                <CardHeader>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded">
-                      {article.category}
-                    </span>
-                    <span className="text-sm text-slate-500 dark:text-slate-400">
-                      {article.readTime}
-                    </span>
-                  </div>
-                  <CardTitle className="text-lg">{article.title}</CardTitle>
-                  <CardDescription className="text-sm">
-                    {article.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-500 dark:text-slate-400">
-                      {article.date}
-                    </span>
-                    <Button variant="ghost" size="sm">
-                      阅读更多 →
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+              <Link key={article.id} href={`/articles/${article.slug}`}>
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardHeader>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded">
+                        {article.category}
+                      </span>
+                      <span className="text-sm text-slate-500 dark:text-slate-400">
+                        {article.readTime}
+                      </span>
+                    </div>
+                    <CardTitle className="text-lg">{article.title}</CardTitle>
+                    <CardDescription className="text-sm">
+                      {article.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-slate-500 dark:text-slate-400">
+                        {article.date}
+                      </span>
+                      <Button variant="ghost" size="sm">
+                        阅读更多 →
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
 

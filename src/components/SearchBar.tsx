@@ -6,16 +6,16 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
-import { searchArticles } from "@/lib/articles";
+import { searchArticles, Article } from "@/lib/articles";
 
 interface SearchBarProps {
-  onSearch?: (results: any[]) => void;
+  onSearch?: (results: Article[]) => void;
   placeholder?: string;
 }
 
 export default function SearchBar({ onSearch, placeholder = "搜索文章..." }: SearchBarProps) {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<Article[]>([]);
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
