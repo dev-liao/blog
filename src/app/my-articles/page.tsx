@@ -5,7 +5,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Plus, Edit, Trash2, Eye, Calendar, Tag } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';

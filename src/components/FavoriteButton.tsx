@@ -10,7 +10,7 @@ interface FavoriteButtonProps {
   className?: string;
 }
 
-export default function FavoriteButton({ articleId, articleTitle, className }: FavoriteButtonProps) {
+export default function FavoriteButton({ articleId, className }: FavoriteButtonProps) {
   const [isFavorited, setIsFavorited] = useState(false);
   const [mounted, setMounted] = useState(false);
 

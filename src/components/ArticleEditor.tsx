@@ -63,7 +63,7 @@ export default function ArticleEditor({ article, onSave, onCancel }: ArticleEdit
         .replace(/^-+|-+$/g, ''),
       author: '当前用户', // 在实际应用中应该从认证上下文获取
       date: new Date().toISOString(),
-      readTime: Math.ceil(formData.content.length / 500), // 估算阅读时间
+      readTime: `${Math.ceil(formData.content.length / 500)}分钟阅读`, // 估算阅读时间
     };
 
     const result = await onSave(articleData);
