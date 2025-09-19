@@ -32,7 +32,7 @@ async function fixUserSync() {
       }
 
       // 创建用户记录
-      const { data: userData, error: userError } = await supabase
+      const { error: userError } = await supabase
         .from('users')
         .insert({
           id: authUser.id,

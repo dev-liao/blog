@@ -75,13 +75,6 @@ export default function ProfilePage() {
       .slice(0, 2);
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('zh-CN', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
 
   return (
     <div className="container mx-auto px-4 py-8">

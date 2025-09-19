@@ -115,7 +115,7 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
           excerpt: articleData.description || articleData.content?.substring(0, 200) || article.description,
           slug: slug,
           tags: articleData.tags || article.tags,
-          published: articleData.published !== undefined ? articleData.published : article.published,
+          published: true, // 编辑时默认为已发布
           featured_image: null
         }),
       });

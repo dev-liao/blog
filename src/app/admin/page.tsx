@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { canAccessAdmin } from '@/lib/permissions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Users, FileText, Eye, Edit, Trash2, Plus } from 'lucide-react';
 import Link from 'next/link';
@@ -21,7 +20,18 @@ export default function AdminDashboard() {
     draftArticles: 0,
     totalUsers: 0,
   });
-  const [articles, setArticles] = useState<any[]>([]);
+  const [articles, setArticles] = useState<Array<{
+    id: string;
+    title: string;
+    excerpt: string;
+    slug: string;
+    published: boolean;
+    created_at: string;
+    tags: string[];
+    author?: {
+      name: string;
+    };
+  }>>([]);
   const [articlesLoading, setArticlesLoading] = useState(true);
 
   const loadArticles = async () => {

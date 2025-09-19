@@ -1,18 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import ArticleEditor from '@/components/ArticleEditor';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
 import { Article } from '@/lib/articles';
-import { ArticleService } from '@/lib/articleService';
 
 export default function NewArticlePage() {
   const { isAuthenticated, user, isLoading } = useAuth();
   const router = useRouter();
-  const [isSaving, setIsSaving] = useState(false);
 
   if (isLoading) {
     return (
@@ -39,8 +37,6 @@ export default function NewArticlePage() {
   }
 
   const handleSave = async (articleData: Partial<Article>) => {
-    setIsSaving(true);
-    
     try {
       if (!user) {
         return { 
@@ -91,8 +87,6 @@ export default function NewArticlePage() {
         success: false, 
         error: '保存文章时发生错误: ' + (error as Error).message
       };
-    } finally {
-      setIsSaving(false);
     }
   };
 
