@@ -147,10 +147,43 @@ CREATE POLICY "Users can delete own favorites" ON favorites
 3. 在 "Site URL" 中填入 `http://localhost:3000`
 4. 在 "Redirect URLs" 中添加 `http://localhost:3000/auth/callback`
 
-## 6. 启动项目
+## 6. 创建管理员账号
+
+### 方法一：使用脚本创建（推荐）
+
+```bash
+# 安装依赖
+npm install
+
+# 创建管理员用户
+npm run create-admin
+```
+
+### 方法二：通过 Supabase 控制台创建
+
+1. 访问 Supabase 控制台 > Authentication > Users
+2. 点击 "Add user" 按钮
+3. 填写信息：
+   - Email: `admin@example.com`
+   - Password: `password123`
+   - 勾选 "Email Confirm"
+4. 点击 "Create user"
+
+### 方法三：通过 SQL 脚本
+
+在 Supabase SQL 编辑器中执行 `scripts/create-admin-user.sql` 文件。
+
+## 7. 启动项目
 
 ```bash
 npm run dev
 ```
 
 访问 `http://localhost:3000` 开始使用！
+
+## 8. 测试账户
+
+创建完成后，您可以使用以下测试账户：
+
+- **管理员账户**: admin@example.com / password123
+- **普通用户**: user@example.com / password123
