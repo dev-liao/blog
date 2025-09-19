@@ -25,41 +25,16 @@ export class SupabaseAuthService {
         .eq('id', user.id)
         .single()
 
-      // 如果用户不存在于 users 表中，自动创建
       if (userError || !userData) {
-        console.log('用户不存在于 users 表中，正在创建...')
-        
-        const { data: newUserData, error: createError } = await supabase
-          .from('users')
-          .insert({
-            id: user.id,
-            email: user.email!,
-            name: user.user_metadata?.name || user.email!.split('@')[0],
-            avatar_url: user.user_metadata?.avatar_url || null,
-            created_at: user.created_at,
-            updated_at: user.updated_at || user.created_at
-          })
-          .select()
-          .single()
-
-        if (createError) {
-          console.error('创建用户记录失败:', createError.message)
-          return null
-        }
-
-        return {
-          id: newUserData.id,
-          email: newUserData.email,
-          name: newUserData.name,
-          avatar_url: newUserData.avatar_url
-        }
+        return null
       }
 
       return {
         id: userData.id,
         email: userData.email,
         name: userData.name,
-        avatar_url: userData.avatar_url
+        avatar_url: userData.avatar_url,
+        role: userData.role || 'user'
       }
     } catch (error) {
       console.error('Error getting current user:', error)
@@ -132,47 +107,25 @@ export class SupabaseAuthService {
         return { success: false, error: '登录失败' }
       }
 
-      // 获取用户详细信息，如果不存在则自动创建
+      // 获取用户详细信息
       const { data: userData, error: userError } = await supabase
         .from('users')
         .select('*')
         .eq('id', data.user.id)
         .single()
 
-      let finalUserData = userData
-
-      // 如果用户不存在于 users 表中，自动创建
       if (userError || !userData) {
-        console.log('用户不存在于 users 表中，正在创建...')
-        
-        const { data: newUserData, error: createError } = await supabase
-          .from('users')
-          .insert({
-            id: data.user.id,
-            email: data.user.email!,
-            name: data.user.user_metadata?.name || data.user.email!.split('@')[0],
-            avatar_url: data.user.user_metadata?.avatar_url || null,
-            created_at: data.user.created_at,
-            updated_at: data.user.updated_at || data.user.created_at
-          })
-          .select()
-          .single()
-
-        if (createError) {
-          console.error('创建用户记录失败:', createError.message)
-          return { success: false, error: '创建用户记录失败' }
-        }
-
-        finalUserData = newUserData
+        return { success: false, error: '获取用户信息失败' }
       }
 
       return {
         success: true,
         user: {
-          id: finalUserData.id,
-          email: finalUserData.email,
-          name: finalUserData.name,
-          avatar_url: finalUserData.avatar_url
+          id: userData.id,
+          email: userData.email,
+          name: userData.name,
+          avatar_url: userData.avatar_url,
+          role: userData.role || 'user'
         }
       }
     } catch (error) {
