@@ -185,3 +185,4 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
     </Card>
   );
 }
+
