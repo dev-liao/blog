@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Users, FileText, Eye, Edit, Trash2, Plus } from 'lucide-react';
 import Link from 'next/link';
-import { SupabaseArticleService } from '@/lib/supabaseArticles';
 import { supabase } from '@/lib/supabase';
 
 export default function AdminDashboard() {
@@ -38,14 +37,27 @@ export default function AdminDashboard() {
   const loadArticles = async () => {
     try {
       setArticlesLoading(true);
-      const allArticles = await SupabaseArticleService.getPublishedArticles();
-      setArticles(allArticles);
+      
+      // 获取所有文章（包括草稿）
+      const { data: allArticles, error } = await supabase
+        .from('articles')
+        .select(`
+          *,
+          author:users(id, name, avatar_url)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
+      setArticles(allArticles || []);
       
       // 更新统计数据
       setStats({
-        totalArticles: allArticles.length,
-        publishedArticles: allArticles.filter(article => article.published).length,
-        draftArticles: allArticles.filter(article => !article.published).length,
+        totalArticles: allArticles?.length || 0,
+        publishedArticles: allArticles?.filter(article => article.published).length || 0,
+        draftArticles: allArticles?.filter(article => !article.published).length || 0,
         totalUsers: 2, // 模拟用户数量
       });
     } catch (error) {

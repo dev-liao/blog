@@ -8,13 +8,13 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, Plus, Edit, Trash2, Eye, Calendar, Tag } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { Article } from '@/lib/articles';
-import { ArticleService } from '@/lib/articleService';
+import { SupabaseArticleService, ArticleWithAuthor } from '@/lib/supabaseArticles';
 import { canAccessAdmin } from '@/lib/permissions';
+import { supabase } from '@/lib/supabase';
 
 export default function MyArticlesPage() {
   const { isAuthenticated, user, isLoading } = useAuth();
-  const [myArticles, setMyArticles] = useState<Article[]>([]);
+  const [myArticles, setMyArticles] = useState<ArticleWithAuthor[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,13 +32,16 @@ export default function MyArticlesPage() {
     // 获取用户文章
     const fetchMyArticles = async () => {
       setLoading(true);
-      // 模拟API调用延迟
-      await new Promise(resolve => setTimeout(resolve, 500));
       
       if (user) {
-        // 从ArticleService获取用户文章
-        const userArticles = ArticleService.getUserArticles(user.id);
-        setMyArticles(userArticles);
+        try {
+          // 从 Supabase 获取用户文章
+          const userArticles = await SupabaseArticleService.getUserArticles(user.id);
+          setMyArticles(userArticles);
+        } catch (error) {
+          console.error('Error fetching user articles:', error);
+          setMyArticles([]);
+        }
       }
       
       setLoading(false);
@@ -70,14 +73,32 @@ export default function MyArticlesPage() {
 
     if (!user) return;
 
-    const articleIdNum = parseInt(articleId, 10);
-    const success = ArticleService.deleteArticle(articleIdNum, user.id);
-    
-    if (success) {
+    try {
+      // 获取 Supabase 会话 token
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) {
+        throw new Error('用户未登录或会话已过期')
+      }
+
+      // 调用 API 删除文章
+      const response = await fetch(`/api/articles/${articleId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '删除文章失败');
+      }
+
       // 更新本地状态
-      setMyArticles(prev => prev.filter(article => article.id.toString() !== articleId));
-    } else {
-      alert('删除文章失败，请重试');
+      setMyArticles(prev => prev.filter(article => article.id !== articleId));
+    } catch (error) {
+      console.error('Error deleting article:', error);
+      alert('删除文章失败: ' + (error as Error).message);
     }
   };
 
@@ -140,7 +161,7 @@ export default function MyArticlesPage() {
                         </Link>
                       </CardTitle>
                       <CardDescription className="text-base">
-                        {article.description}
+                        {article.excerpt}
                       </CardDescription>
                     </div>
                     <div className="flex gap-2 ml-4">
@@ -178,14 +199,14 @@ export default function MyArticlesPage() {
                   <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Calendar className="h-4 w-4" />
-                      {formatDate(article.date)}
+                      {formatDate(article.created_at)}
                     </div>
                     <div className="flex items-center gap-1">
                       <Tag className="h-4 w-4" />
-                      {article.category}
+                      {article.tags?.join(', ') || '无标签'}
                     </div>
                     <div className="flex items-center gap-1">
-                      <span>阅读时间：{article.readTime}分钟</span>
+                      <span>状态：{article.published ? '已发布' : '草稿'}</span>
                     </div>
                   </div>
                   

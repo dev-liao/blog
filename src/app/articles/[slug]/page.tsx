@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
-import { getArticleBySlug, getArticlesByCategory } from "@/lib/articles";
+import { SupabaseArticleService } from "@/lib/supabaseArticles";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import CommentSection from "@/components/CommentSection";
 import Link from "next/link";
-import { ArrowLeft, Calendar, Clock, User, Tag } from "lucide-react";
+import { ArrowLeft, Calendar, User, Tag } from "lucide-react";
 import type { Metadata } from "next";
 
 interface ArticlePageProps {
@@ -14,61 +14,84 @@ interface ArticlePageProps {
 }
 
 export async function generateStaticParams() {
-  const articles = await import("@/lib/articles").then(m => m.articles);
-  return articles.map((article) => ({
-    slug: article.slug,
-  }));
+  try {
+    const articles = await SupabaseArticleService.getPublishedArticles();
+    return articles.map((article) => ({
+      slug: article.slug,
+    }));
+  } catch (error) {
+    console.error('Error generating static params:', error);
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
   const { slug } = await params;
-  const article = getArticleBySlug(slug);
   
-  if (!article) {
+  try {
+    const articles = await SupabaseArticleService.getPublishedArticles();
+    const article = articles.find(a => a.slug === slug);
+    
+    if (!article) {
+      return {
+        title: "文章未找到",
+      };
+    }
+
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const articleUrl = `${baseUrl}/articles/${article.slug}`;
+
+    return {
+      title: article.title,
+      description: article.excerpt,
+      keywords: article.tags,
+      authors: [{ name: article.author?.name || '未知作者' }],
+      openGraph: {
+        title: article.title,
+        description: article.excerpt,
+        url: articleUrl,
+        type: "article",
+        publishedTime: article.created_at,
+        authors: [article.author?.name || '未知作者'],
+        tags: article.tags,
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: article.title,
+        description: article.excerpt,
+      },
+      alternates: {
+        canonical: articleUrl,
+      },
+    };
+  } catch (error) {
+    console.error('Error generating metadata:', error);
     return {
       title: "文章未找到",
     };
   }
-
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-  const articleUrl = `${baseUrl}/articles/${article.slug}`;
-
-  return {
-    title: article.title,
-    description: article.description,
-    keywords: article.tags,
-    authors: [{ name: article.author }],
-    openGraph: {
-      title: article.title,
-      description: article.description,
-      url: articleUrl,
-      type: "article",
-      publishedTime: article.date,
-      authors: [article.author],
-      tags: article.tags,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: article.title,
-      description: article.description,
-    },
-    alternates: {
-      canonical: articleUrl,
-    },
-  };
 }
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
   const { slug } = await params;
-  const article = getArticleBySlug(slug);
   
-  if (!article) {
-    notFound();
-  }
+  try {
+    const articles = await SupabaseArticleService.getPublishedArticles();
+    console.log('Available articles:', articles.map(a => ({ id: a.id, slug: a.slug, title: a.title })));
+    console.log('Looking for slug:', slug);
+    
+    const article = articles.find(a => a.slug === slug);
+    
+    if (!article) {
+      console.log('Article not found for slug:', slug);
+      notFound();
+    }
 
-  const relatedArticles = getArticlesByCategory(article.category)
-    .filter(a => a.id !== article.id)
-    .slice(0, 3);
+    // 获取相关文章（基于标签）
+    const relatedArticles = articles
+      .filter(a => a.id !== article.id && a.published)
+      .filter(a => a.tags?.some(tag => article.tags?.includes(tag)))
+      .slice(0, 3);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
@@ -90,13 +113,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             <CardHeader>
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-3 py-1 rounded-full">
-                  {article.category}
+                  {article.published ? '已发布' : '草稿'}
                 </span>
-                {article.featured && (
-                  <span className="text-sm font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-3 py-1 rounded-full">
-                    精选
-                  </span>
-                )}
               </div>
               
               <CardTitle className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
@@ -104,28 +122,24 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               </CardTitle>
               
               <CardDescription className="text-lg text-slate-600 dark:text-slate-300 mb-6">
-                {article.description}
+                {article.excerpt}
               </CardDescription>
 
               {/* 文章元信息 */}
               <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
                 <div className="flex items-center gap-1">
                   <User className="w-4 h-4" />
-                  <span>{article.author}</span>
+                  <span>{article.author?.name || '未知作者'}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Calendar className="w-4 h-4" />
-                  <span>{article.date}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Clock className="w-4 h-4" />
-                  <span>{article.readTime}</span>
+                  <span>{new Date(article.created_at).toLocaleDateString('zh-CN')}</span>
                 </div>
               </div>
 
               {/* 标签 */}
               <div className="flex flex-wrap gap-2 mt-4">
-                {article.tags.map((tag, index) => (
+                {article.tags?.map((tag, index) => (
                   <span
                     key={index}
                     className="flex items-center gap-1 text-xs text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded"
@@ -165,7 +179,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                   相关文章
                 </CardTitle>
                 <CardDescription>
-                  更多关于 {article.category} 的文章
+                  相关文章
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -180,13 +194,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                         <CardHeader>
                           <CardTitle className="text-lg">{relatedArticle.title}</CardTitle>
                           <CardDescription className="text-sm">
-                            {relatedArticle.description}
+                            {relatedArticle.excerpt}
                           </CardDescription>
                         </CardHeader>
                         <CardContent>
                           <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
-                            <span>{relatedArticle.date}</span>
-                            <span>{relatedArticle.readTime}</span>
+                            <span>{new Date(relatedArticle.created_at).toLocaleDateString('zh-CN')}</span>
+                            <span>{Math.ceil(relatedArticle.content.length / 500)}分钟阅读</span>
                           </div>
                         </CardContent>
                       </Card>
@@ -200,4 +214,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       </main>
     </div>
   );
+  } catch (error) {
+    console.error('Error loading article:', error);
+    notFound();
+  }
 }

@@ -7,7 +7,8 @@ import { notFound } from 'next/navigation';
 import ArticleEditor from '@/components/ArticleEditor';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
-import { getArticleBySlug, Article } from '@/lib/articles';
+import { Article } from '@/lib/articles';
+import { SupabaseArticleService, ArticleWithAuthor } from '@/lib/supabaseArticles';
 import { supabase } from '@/lib/supabase';
 import { canAccessAdmin } from '@/lib/permissions';
 
@@ -22,7 +23,7 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
   const resolvedParams = use(params);
   const { isAuthenticated, user, isLoading } = useAuth();
   const router = useRouter();
-  const [article, setArticle] = useState<Article | null>(null);
+  const [article, setArticle] = useState<ArticleWithAuthor | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,20 +33,30 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
     }
 
     if (isAuthenticated) {
-      // 获取文章数据
-      const articleData = getArticleBySlug(resolvedParams.slug);
-      if (!articleData) {
-        notFound();
-      }
-      
       // 检查用户是否有权限编辑此文章（只有管理员可以编辑）
       if (!canAccessAdmin(user)) {
         router.push('/');
         return;
       }
-      
-      setArticle(articleData);
-      setLoading(false);
+
+      // 获取文章数据
+      const loadArticle = async () => {
+        try {
+          const articles = await SupabaseArticleService.getPublishedArticles();
+          const articleData = articles.find(a => a.slug === resolvedParams.slug);
+          if (!articleData) {
+            notFound();
+          }
+          setArticle(articleData);
+        } catch (error) {
+          console.error('Error loading article:', error);
+          notFound();
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      loadArticle();
     }
   }, [isAuthenticated, isLoading, resolvedParams.slug, user, router]);
 
@@ -121,7 +132,7 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
         body: JSON.stringify({
           title: articleData.title || article.title,
           content: articleData.content || article.content,
-          excerpt: articleData.description || articleData.content?.substring(0, 200) || article.description,
+          excerpt: articleData.description || articleData.content?.substring(0, 200) || article.excerpt,
           slug: slug,
           tags: articleData.tags || article.tags,
           published: true, // 编辑时默认为已发布
@@ -152,10 +163,25 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
   };
 
 
+  // 将 Supabase 文章数据转换为 ArticleEditor 期望的格式
+  const articleForEditor = article ? {
+    id: parseInt(article.id.replace(/-/g, '').substring(0, 8), 16), // 将 UUID 转换为数字
+    title: article.title,
+    description: article.excerpt,
+    content: article.content,
+    category: '技术', // 默认分类
+    tags: article.tags || [],
+    author: article.author?.name || '未知作者',
+    slug: article.slug,
+    date: article.created_at,
+    readTime: `${Math.ceil(article.content.length / 500)}分钟阅读`,
+    featured: false
+  } : null;
+
   return (
     <div className="container mx-auto px-4 py-8">
       <ArticleEditor
-        article={article}
+        article={articleForEditor || undefined}
         onSave={handleSave}
         onCancel={handleCancel}
       />
