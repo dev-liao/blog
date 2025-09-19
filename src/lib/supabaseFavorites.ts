@@ -25,7 +25,8 @@ export class SupabaseFavoriteService {
         return []
       }
 
-      return data?.map(item => item.article).filter(Boolean) || []
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return (data as any)?.map((item: any) => item.article).filter(Boolean) || []
     } catch (error) {
       console.error('Error fetching favorites:', error)
       return []

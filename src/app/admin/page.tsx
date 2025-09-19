@@ -7,9 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Users, FileText, Eye, Edit, Trash2, Plus, BarChart3 } from 'lucide-react';
+import { Loader2, Users, FileText, Eye, Edit, Trash2, Plus } from 'lucide-react';
 import Link from 'next/link';
-import { articles, Article } from '@/lib/articles';
+import { articles } from '@/lib/articles';
 
 export default function AdminDashboard() {
   const { isAuthenticated, user, isLoading } = useAuth();

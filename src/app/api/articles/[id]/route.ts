@@ -3,10 +3,11 @@ import { SupabaseArticleService } from '@/lib/supabaseArticles'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const article = await SupabaseArticleService.getArticleBySlug(params.id)
+    const { id } = await params;
+    const article = await SupabaseArticleService.getArticleBySlug(id)
     
     if (!article) {
       return NextResponse.json(
@@ -27,13 +28,14 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json()
     const { title, content, excerpt, slug, tags, published, featured_image } = body
 
-    const result = await SupabaseArticleService.updateArticle(params.id, {
+    const result = await SupabaseArticleService.updateArticle(id, {
       title,
       content,
       excerpt,
@@ -62,10 +64,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const result = await SupabaseArticleService.deleteArticle(params.id)
+    const { id } = await params;
+    const result = await SupabaseArticleService.deleteArticle(id)
 
     if (!result.success) {
       return NextResponse.json(

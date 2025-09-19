@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Article } from '@/lib/articles';
-
-// 模拟数据库存储
-let articlesDatabase: Article[] = [];
+import { SupabaseArticleService } from '@/lib/supabaseArticles';
 
 // 获取用户的所有文章
 export async function GET(
@@ -12,13 +9,13 @@ export async function GET(
   try {
     const { userId } = await params;
     
-    const userArticles = articlesDatabase.filter(article => article.author === userId);
+    const userArticles = await SupabaseArticleService.getUserArticles(userId);
     
     return NextResponse.json({
       success: true,
       data: userArticles
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, error: '获取用户文章失败' },
       { status: 500 }

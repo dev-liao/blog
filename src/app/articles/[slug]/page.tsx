@@ -153,7 +153,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           {/* 评论系统 */}
           <Card className="mb-8">
             <CardContent className="pt-6">
-              <CommentSection articleId={article.id} />
+              <CommentSection articleId={article.id.toString()} />
             </CardContent>
           </Card>
 

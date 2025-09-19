@@ -22,7 +22,6 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
   const router = useRouter();
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -87,8 +86,6 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
   }
 
   const handleSave = async (articleData: Partial<Article>) => {
-    setIsSaving(true);
-    
     try {
       // 模拟API调用
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -98,13 +95,11 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
       
       // 模拟成功响应
       return { success: true };
-    } catch (error) {
+    } catch {
       return { 
         success: false, 
         error: '更新文章时发生错误，请重试' 
       };
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -112,10 +107,6 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
     router.back();
   };
 
-  const handleSaveSuccess = () => {
-    // 保存成功后跳转到文章详情页面
-    router.push(`/articles/${article.slug}`);
-  };
 
   return (
     <div className="container mx-auto px-4 py-8">

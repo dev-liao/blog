@@ -45,12 +45,12 @@ async function migrateArticles() {
         .insert({
           title: article.title,
           content: article.content,
-          excerpt: article.excerpt,
+          excerpt: article.description || article.content.substring(0, 200) + '...',
           slug: article.slug,
           author_id: adminUserId,
           tags: article.tags || [],
           published: true,
-          featured_image: article.featuredImage,
+          featured_image: null,
           created_at: article.date,
           updated_at: article.date
         })

@@ -1,11 +1,11 @@
 import { supabase } from './supabase'
-import { User } from '@supabase/supabase-js'
 
 export interface AuthUser {
   id: string
   email: string
   name: string
   avatar_url?: string
+  role?: string
 }
 
 export class SupabaseAuthService {
