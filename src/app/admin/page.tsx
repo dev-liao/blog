@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Users, FileText, Eye, Edit, Trash2, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { SupabaseArticleService } from '@/lib/supabaseArticles';
+import { supabase } from '@/lib/supabase';
 
 export default function AdminDashboard() {
   const { isAuthenticated, user, isLoading } = useAuth();
@@ -100,10 +101,17 @@ export default function AdminDashboard() {
     }
 
     try {
+      // 获取 Supabase 会话 token
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) {
+        throw new Error('用户未登录或会话已过期')
+      }
+
       const response = await fetch(`/api/articles/${articleId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
         },
       });
 

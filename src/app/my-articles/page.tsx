@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { Article } from '@/lib/articles';
 import { ArticleService } from '@/lib/articleService';
+import { canAccessAdmin } from '@/lib/permissions';
 
 export default function MyArticlesPage() {
   const { isAuthenticated, user, isLoading } = useAuth();
@@ -20,7 +21,12 @@ export default function MyArticlesPage() {
     if (!isLoading && !isAuthenticated) {
       redirect('/');
     }
-  }, [isAuthenticated, isLoading]);
+    
+    // 检查管理员权限
+    if (!isLoading && isAuthenticated && user && !canAccessAdmin(user)) {
+      redirect('/');
+    }
+  }, [isAuthenticated, isLoading, user]);
 
   useEffect(() => {
     // 获取用户文章

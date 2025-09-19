@@ -8,6 +8,8 @@ import ArticleEditor from '@/components/ArticleEditor';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
 import { getArticleBySlug, Article } from '@/lib/articles';
+import { supabase } from '@/lib/supabase';
+import { canAccessAdmin } from '@/lib/permissions';
 
 interface EditArticlePageProps {
   params: Promise<{
@@ -36,9 +38,9 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
         notFound();
       }
       
-      // 检查用户是否有权限编辑此文章
-      if (articleData.author !== user?.name && user?.role !== 'admin') {
-        router.push('/my-articles');
+      // 检查用户是否有权限编辑此文章（只有管理员可以编辑）
+      if (!canAccessAdmin(user)) {
+        router.push('/');
         return;
       }
       
@@ -103,11 +105,18 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
             .replace(/^-+|-+$/g, '') 
           : article.slug);
 
+      // 获取 Supabase 会话 token
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) {
+        throw new Error('用户未登录或会话已过期')
+      }
+
       // 调用 Supabase API 更新文章
       const response = await fetch(`/api/articles/${article.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
           title: articleData.title || article.title,

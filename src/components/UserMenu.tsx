@@ -12,8 +12,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User, Settings, LogOut, BookOpen, Heart } from 'lucide-react';
+import { User, Settings, LogOut, BookOpen, Heart, Plus } from 'lucide-react';
 import Link from 'next/link';
+import { canAccessAdmin } from '@/lib/permissions';
 
 export default function UserMenu() {
   const { user, logout } = useAuth();
@@ -61,21 +62,30 @@ export default function UserMenu() {
             <span>个人资料</span>
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href="/my-articles" className="flex items-center">
-            <BookOpen className="mr-2 h-4 w-4" />
-            <span>我的文章</span>
-          </Link>
-        </DropdownMenuItem>
+        {/* 只有管理员可以看到我的文章 */}
+        {canAccessAdmin(user) && (
+          <DropdownMenuItem asChild>
+            <Link href="/my-articles" className="flex items-center">
+              <BookOpen className="mr-2 h-4 w-4" />
+              <span>我的文章</span>
+            </Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem asChild>
           <Link href="/favorites" className="flex items-center">
             <Heart className="mr-2 h-4 w-4" />
             <span>我的收藏</span>
           </Link>
         </DropdownMenuItem>
-        {user.role === 'admin' && (
+        {canAccessAdmin(user) && (
           <>
             <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/articles/new" className="flex items-center">
+                <Plus className="mr-2 h-4 w-4" />
+                <span>新建文章</span>
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href="/admin" className="flex items-center">
                 <Settings className="mr-2 h-4 w-4" />

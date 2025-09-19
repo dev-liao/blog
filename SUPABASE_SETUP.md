@@ -16,6 +16,7 @@
 3. 复制以下信息：
    - Project URL
    - Project API keys -> anon public
+   - Project API keys -> service_role (重要：用于服务端操作)
 
 ## 3. 配置环境变量
 
@@ -25,7 +26,19 @@
 # Supabase 配置
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 ```
+
+**重要说明：**
+- `SUPABASE_SERVICE_ROLE_KEY` 用于服务端 API 操作，具有绕过 RLS 策略的权限
+- 请勿将 `SUPABASE_SERVICE_ROLE_KEY` 暴露给客户端
+- 此密钥仅用于服务端验证用户身份和操作数据库
+- 在 Vercel 等部署平台中，需要在环境变量设置中添加 `SUPABASE_SERVICE_ROLE_KEY`
+
+**获取 service_role 密钥：**
+1. 在 Supabase 项目仪表板中，点击 "Settings" -> "API"
+2. 在 "Project API keys" 部分找到 "service_role" 密钥
+3. 复制该密钥并添加到您的环境变量中
 
 ## 4. 数据库表结构
 
