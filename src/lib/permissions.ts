@@ -36,9 +36,28 @@ export class PermissionService {
 }
 
 // 导出常用的权限检查函数
-export const isAdmin = PermissionService.isAdmin
-export const isUser = PermissionService.isUser
-export const canAccessAdmin = PermissionService.canAccessAdmin
-export const canEditArticle = PermissionService.canEditArticle
-export const canDeleteArticle = PermissionService.canDeleteArticle
-export const canManageUsers = PermissionService.canManageUsers
+export const isAdmin = (user: AuthUser | null): boolean => {
+  return user?.role === 'admin'
+}
+
+export const isUser = (user: AuthUser | null): boolean => {
+  return user?.role === 'user' || !user?.role
+}
+
+export const canAccessAdmin = (user: AuthUser | null): boolean => {
+  return isAdmin(user)
+}
+
+export const canEditArticle = (user: AuthUser | null, articleAuthorId?: string): boolean => {
+  if (!user) return false
+  return isAdmin(user) || user.id === articleAuthorId
+}
+
+export const canDeleteArticle = (user: AuthUser | null, articleAuthorId?: string): boolean => {
+  if (!user) return false
+  return isAdmin(user) || user.id === articleAuthorId
+}
+
+export const canManageUsers = (user: AuthUser | null): boolean => {
+  return isAdmin(user)
+}
