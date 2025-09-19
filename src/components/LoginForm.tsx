@@ -137,3 +137,4 @@ export default function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormPr
     </Card>
   );
 }
+

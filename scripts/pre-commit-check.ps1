@@ -24,3 +24,4 @@ Write-Host "📊 构建统计：" -ForegroundColor Cyan
 Write-Host $buildResult -ForegroundColor White
 
 exit 0
+
