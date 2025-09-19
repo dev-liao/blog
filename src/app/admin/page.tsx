@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Users, FileText, Eye, Edit, Trash2, Plus } from 'lucide-react';
 import Link from 'next/link';
-import { articles } from '@/lib/articles';
+import { SupabaseArticleService } from '@/lib/supabaseArticles';
 
 export default function AdminDashboard() {
   const { isAuthenticated, user, isLoading } = useAuth();
@@ -21,6 +21,28 @@ export default function AdminDashboard() {
     draftArticles: 0,
     totalUsers: 0,
   });
+  const [articles, setArticles] = useState<any[]>([]);
+  const [articlesLoading, setArticlesLoading] = useState(true);
+
+  const loadArticles = async () => {
+    try {
+      setArticlesLoading(true);
+      const allArticles = await SupabaseArticleService.getPublishedArticles();
+      setArticles(allArticles);
+      
+      // 更新统计数据
+      setStats({
+        totalArticles: allArticles.length,
+        publishedArticles: allArticles.filter(article => article.published).length,
+        draftArticles: allArticles.filter(article => !article.published).length,
+        totalUsers: 2, // 模拟用户数量
+      });
+    } catch (error) {
+      console.error('Error loading articles:', error);
+    } finally {
+      setArticlesLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -34,13 +56,7 @@ export default function AdminDashboard() {
     }
 
     if (user) {
-      // 模拟获取统计数据
-      setStats({
-        totalArticles: articles.length,
-        publishedArticles: articles.length, // 假设所有文章都是已发布
-        draftArticles: 0,
-        totalUsers: 2, // 模拟用户数量
-      });
+      loadArticles();
     }
   }, [isAuthenticated, isLoading, user, router]);
 
@@ -73,9 +89,25 @@ export default function AdminDashboard() {
       return;
     }
 
-    // 模拟删除文章
-    console.log('Deleting article:', articleId);
-    // 在实际应用中，这里会调用API删除文章
+    try {
+      const response = await fetch(`/api/articles/${articleId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '删除文章失败');
+      }
+
+      // 删除成功后重新加载文章列表
+      await loadArticles();
+    } catch (error) {
+      console.error('Error deleting article:', error);
+      alert('删除文章失败: ' + (error as Error).message);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -171,8 +203,14 @@ export default function AdminDashboard() {
           </CardHeader>
           
           <CardContent>
-            <div className="space-y-4">
-              {articles.map((article) => (
+            {articlesLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin" />
+                <span className="ml-2">加载文章中...</span>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {articles.map((article) => (
                 <div
                   key={article.id}
                   className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
@@ -180,19 +218,23 @@ export default function AdminDashboard() {
                   <div className="flex-1">
                     <h3 className="font-semibold">{article.title}</h3>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {article.description}
+                      {article.excerpt}
                     </p>
                     <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                      <span>作者：{article.author}</span>
-                      <span>分类：{article.category}</span>
-                      <span>日期：{formatDate(article.date)}</span>
+                      <span>作者：{article.author?.name || '未知'}</span>
+                      <span>标签：{article.tags?.join(', ') || '无'}</span>
+                      <span>日期：{formatDate(article.created_at)}</span>
+                      <span className={`px-2 py-1 rounded text-xs ${
+                        article.published 
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+                          : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                      }`}>
+                        {article.published ? '已发布' : '草稿'}
+                      </span>
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary">
-                      {article.category}
-                    </Badge>
                     <Button variant="outline" size="sm" asChild>
                       <Link href={`/articles/${article.slug}`}>
                         <Eye className="h-4 w-4" />
@@ -206,7 +248,7 @@ export default function AdminDashboard() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleDeleteArticle(article.id.toString())}
+                      onClick={() => handleDeleteArticle(article.id)}
                       className="text-destructive hover:text-destructive"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -214,7 +256,8 @@ export default function AdminDashboard() {
                   </div>
                 </div>
               ))}
-            </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

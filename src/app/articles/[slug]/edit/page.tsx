@@ -87,18 +87,53 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
 
   const handleSave = async (articleData: Partial<Article>) => {
     try {
-      // 模拟API调用
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (!user || !article) {
+        return { 
+          success: false, 
+          error: '用户未登录或文章不存在' 
+        };
+      }
+
+      // 生成 slug
+      const slug = articleData.slug || 
+        (articleData.title ? 
+          articleData.title
+            .toLowerCase()
+            .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-')
+            .replace(/^-+|-+$/g, '') 
+          : article.slug);
+
+      // 调用 Supabase API 更新文章
+      const response = await fetch(`/api/articles/${article.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: articleData.title || article.title,
+          content: articleData.content || article.content,
+          excerpt: articleData.description || articleData.content?.substring(0, 200) || article.description,
+          slug: slug,
+          tags: articleData.tags || article.tags,
+          published: articleData.published !== undefined ? articleData.published : article.published,
+          featured_image: null
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '更新文章失败');
+      }
+
+      const result = await response.json();
+      console.log('Article updated in Supabase:', result.article);
       
-      // 在实际应用中，这里会调用API更新文章
-      console.log('Updating article:', articleData);
-      
-      // 模拟成功响应
       return { success: true };
-    } catch {
+    } catch (error) {
+      console.error('Error updating article:', error);
       return { 
         success: false, 
-        error: '更新文章时发生错误，请重试' 
+        error: '更新文章时发生错误: ' + (error as Error).message
       };
     }
   };

@@ -49,20 +49,47 @@ export default function NewArticlePage() {
         };
       }
 
-      // 模拟API调用延迟
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // 实际保存文章到localStorage
-      const savedArticle = ArticleService.saveArticle(articleData, user.id);
-      
-      console.log('Article saved:', savedArticle);
+      // 生成 slug
+      const slug = articleData.slug || 
+        (articleData.title ? 
+          articleData.title
+            .toLowerCase()
+            .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-')
+            .replace(/^-+|-+$/g, '') 
+          : 'untitled');
+
+      // 调用 Supabase API 保存文章
+      const response = await fetch('/api/articles', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: articleData.title || '未命名文章',
+          content: articleData.content || '',
+          excerpt: articleData.description || articleData.content?.substring(0, 200) || '',
+          slug: slug,
+          author_id: user.id,
+          tags: articleData.tags || [],
+          published: false, // 默认为草稿
+          featured_image: null
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '保存文章失败');
+      }
+
+      const result = await response.json();
+      console.log('Article saved to Supabase:', result.article);
       
       return { success: true };
     } catch (error) {
       console.error('Error saving article:', error);
       return { 
         success: false, 
-        error: '保存文章时发生错误，请重试' 
+        error: '保存文章时发生错误: ' + (error as Error).message
       };
     } finally {
       setIsSaving(false);
