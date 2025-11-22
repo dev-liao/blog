@@ -1,9 +1,12 @@
-import { articles } from "@/lib/articles";
+import { getAllArticles } from "@/lib/articles";
 
 export const dynamic = 'force-static';
 
 export async function GET() {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  
+  // 获取所有文章（包括 markdown 文章）
+  const articles = getAllArticles();
   
   const rssItems = articles.map(article => `
     <item>

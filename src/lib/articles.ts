@@ -1,9 +1,3 @@
-import { 
-  getAllMarkdownArticles, 
-  getMarkdownArticlesByCategory, 
-  getMarkdownArticleBySlug 
-} from './markdown';
-
 export interface Article {
   id: number;
   title: string;
@@ -26,9 +20,12 @@ export function getArticleBySlug(slug: string): Article | undefined {
   const allArticles = getAllArticles();
   let article = allArticles.find(article => article.slug === slug);
   
-  // 如果在预设文章中没找到，尝试从 markdown 文件加载
+  // 如果在预设文章中没找到，尝试从 markdown 文件加载（仅在服务端）
   if (!article && typeof window === 'undefined') {
     try {
+      // 动态导入避免客户端打包时包含 fs 模块
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { getMarkdownArticleBySlug } = require('./markdown');
       article = getMarkdownArticleBySlug(slug) || undefined;
     } catch (error) {
       console.error('Error loading markdown article:', error);
@@ -49,6 +46,9 @@ export function getArticlesByCategory(category: string): Article[] {
   // 在服务端或构建时，加载对应分类的 markdown 文章
   if (typeof window === 'undefined') {
     try {
+      // 动态导入避免客户端打包时包含 fs 模块
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { getMarkdownArticlesByCategory } = require('./markdown');
       const markdownArticles = getMarkdownArticlesByCategory(category);
       categoryArticles = [...categoryArticles, ...markdownArticles];
     } catch (error) {
@@ -91,6 +91,9 @@ export function getAllArticles(): Article[] {
   // 在服务端或构建时，加载 markdown 文章
   if (typeof window === 'undefined') {
     try {
+      // 动态导入避免客户端打包时包含 fs 模块
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { getAllMarkdownArticles } = require('./markdown');
       const markdownArticles = getAllMarkdownArticles();
       allArticles = [...allArticles, ...markdownArticles];
     } catch (error) {

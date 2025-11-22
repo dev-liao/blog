@@ -52,74 +52,59 @@ export default function NewArticlePage() {
     );
   }
 
-  const handleSave = async (articleData: Partial<Article>) => {
-    try {
-      if (!user) {
-        return { 
-          success: false, 
-          error: '用户未登录' 
-        };
-      }
-
-      // 生成 slug
-      const slug = articleData.slug || 
-        (articleData.title ? 
-          articleData.title
-            .toLowerCase()
-            .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-')
-            .replace(/^-+|-+$/g, '') 
-          : 'untitled');
-
-      // 获取 Supabase 会话 token
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.access_token) {
-        throw new Error('用户未登录或会话已过期')
-      }
-
-      // 调用 Supabase API 保存文章
-      const response = await fetch('/api/articles', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          title: articleData.title || '未命名文章',
-          content: articleData.content || '',
-          excerpt: articleData.description || articleData.content?.substring(0, 200) || '',
-          slug: slug,
-          author_id: user.id,
-          tags: articleData.tags || [],
-          published: false, // 默认为草稿
-          featured_image: null
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || '保存文章失败');
-      }
-
-      const result = await response.json();
-      console.log('Article saved to Supabase:', result.article);
-      
-      return { success: true };
-    } catch (error) {
-      console.error('Error saving article:', error);
-      return { 
-        success: false, 
-        error: '保存文章时发生错误: ' + (error as Error).message
-      };
+  const handleSave = async (articleData: Partial<Article>): Promise<void> => {
+    if (!user) {
+      throw new Error('用户未登录');
     }
+
+    // 生成 slug
+    const slug = articleData.slug || 
+      (articleData.title ? 
+        articleData.title
+          .toLowerCase()
+          .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-')
+          .replace(/^-+|-+$/g, '') 
+        : 'untitled');
+
+    // 获取 Supabase 会话 token
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.access_token) {
+      throw new Error('用户未登录或会话已过期')
+    }
+
+    // 调用 Supabase API 保存文章
+    const response = await fetch('/api/articles', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        title: articleData.title || '未命名文章',
+        content: articleData.content || '',
+        excerpt: articleData.description || articleData.content?.substring(0, 200) || '',
+        slug: slug,
+        author_id: user.id,
+        tags: articleData.tags || [],
+        published: false, // 默认为草稿
+        featured_image: null
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || '保存文章失败');
+    }
+
+    const result = await response.json();
+    console.log('Article saved to Supabase:', result.article);
+    
+    // 保存成功后跳转到我的文章页面
+    router.push('/my-articles');
   };
 
   const handleCancel = () => {
     router.back();
-  };
-
-  const handleSaveSuccess = () => {
-    // 保存成功后跳转到我的文章页面
-    router.push('/my-articles');
   };
 
   return (
@@ -127,7 +112,6 @@ export default function NewArticlePage() {
       <ArticleEditor
         onSave={handleSave}
         onCancel={handleCancel}
-        onSaveSuccess={handleSaveSuccess}
       />
     </div>
   );

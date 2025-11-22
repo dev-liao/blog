@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, Heart, Calendar, Tag, User } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { articles, Article } from '@/lib/articles';
+import { Article } from '@/lib/articles';
 
 export default function FavoritesPage() {
   const { isAuthenticated, user, isLoading } = useAuth();
@@ -33,10 +33,21 @@ export default function FavoritesPage() {
         if (favorites) {
           try {
             const favoriteIds = JSON.parse(favorites);
-            const favoriteArticlesList = articles.filter(article => 
-              favoriteIds.includes(article.id.toString())
-            );
-            setFavoriteArticles(favoriteArticlesList);
+            // 从 localStorage 加载完整的文章数据
+            // 注意：收藏的文章数据应该从 API 或服务端获取
+            // 这里只从 localStorage 读取用户保存的文章
+            const storedArticles = localStorage.getItem('userArticles');
+            if (storedArticles) {
+              try {
+                const allArticles: Article[] = JSON.parse(storedArticles);
+                const favoriteArticlesList = allArticles.filter(article => 
+                  favoriteIds.includes(article.id.toString())
+                );
+                setFavoriteArticles(favoriteArticlesList);
+              } catch (parseError) {
+                console.error('Error parsing user articles:', parseError);
+              }
+            }
           } catch (error) {
             console.error('Error parsing favorite articles:', error);
           }

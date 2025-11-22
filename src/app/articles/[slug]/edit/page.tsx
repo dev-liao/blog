@@ -98,64 +98,54 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
     );
   }
 
-  const handleSave = async (articleData: Partial<Article>) => {
-    try {
-      if (!user || !article) {
-        return { 
-          success: false, 
-          error: '用户未登录或文章不存在' 
-        };
-      }
-
-      // 生成 slug
-      const slug = articleData.slug || 
-        (articleData.title ? 
-          articleData.title
-            .toLowerCase()
-            .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-')
-            .replace(/^-+|-+$/g, '') 
-          : article.slug);
-
-      // 获取 Supabase 会话 token
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.access_token) {
-        throw new Error('用户未登录或会话已过期')
-      }
-
-      // 调用 Supabase API 更新文章
-      const response = await fetch(`/api/articles/${article.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          title: articleData.title || article.title,
-          content: articleData.content || article.content,
-          excerpt: articleData.description || articleData.content?.substring(0, 200) || article.excerpt,
-          slug: slug,
-          tags: articleData.tags || article.tags,
-          published: true, // 编辑时默认为已发布
-          featured_image: null
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || '更新文章失败');
-      }
-
-      const result = await response.json();
-      console.log('Article updated in Supabase:', result.article);
-      
-      return { success: true };
-    } catch (error) {
-      console.error('Error updating article:', error);
-      return { 
-        success: false, 
-        error: '更新文章时发生错误: ' + (error as Error).message
-      };
+  const handleSave = async (articleData: Partial<Article>): Promise<void> => {
+    if (!user || !article) {
+      throw new Error('用户未登录或文章不存在');
     }
+
+    // 生成 slug
+    const slug = articleData.slug || 
+      (articleData.title ? 
+        articleData.title
+          .toLowerCase()
+          .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-')
+          .replace(/^-+|-+$/g, '') 
+        : article.slug);
+
+    // 获取 Supabase 会话 token
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.access_token) {
+      throw new Error('用户未登录或会话已过期')
+    }
+
+    // 调用 Supabase API 更新文章
+    const response = await fetch(`/api/articles/${article.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        title: articleData.title || article.title,
+        content: articleData.content || article.content,
+        excerpt: articleData.description || articleData.content?.substring(0, 200) || article.excerpt,
+        slug: slug,
+        tags: articleData.tags || article.tags,
+        published: true, // 编辑时默认为已发布
+        featured_image: null
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || '更新文章失败');
+    }
+
+    const result = await response.json();
+    console.log('Article updated in Supabase:', result.article);
+    
+    // 保存成功后重定向到文章页面
+    router.push(`/articles/${slug}`);
   };
 
   const handleCancel = () => {

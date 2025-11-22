@@ -8,9 +8,9 @@ import { ArrowLeft, Calendar, User, Tag } from "lucide-react";
 import type { Metadata } from "next";
 
 interface ArticlePageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 // 转换日期格式：从"2024年1月15日"转换为ISO字符串

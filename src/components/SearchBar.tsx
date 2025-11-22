@@ -6,11 +6,52 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
-import { searchArticles, Article } from "@/lib/articles";
+
+// 客户端文章接口（不导入 articles.ts 以避免服务端代码）
+interface Article {
+  id: number;
+  title: string;
+  description: string;
+  content: string;
+  date: string;
+  readTime: string;
+  category: string;
+  tags: string[];
+  author: string;
+  slug: string;
+  featured?: boolean;
+}
 
 interface SearchBarProps {
   onSearch?: (results: Article[]) => void;
   placeholder?: string;
+}
+
+// 客户端搜索函数，只从 localStorage 读取
+function searchArticlesLocal(query: string): Article[] {
+  if (typeof window === 'undefined') {
+    return [];
+  }
+
+  try {
+    const stored = localStorage.getItem('userArticles');
+    if (!stored) {
+      return [];
+    }
+
+    const allArticles: Article[] = JSON.parse(stored);
+    const lowercaseQuery = query.toLowerCase();
+    
+    return allArticles.filter(article => 
+      article.title.toLowerCase().includes(lowercaseQuery) ||
+      article.description.toLowerCase().includes(lowercaseQuery) ||
+      article.content.toLowerCase().includes(lowercaseQuery) ||
+      article.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))
+    );
+  } catch (error) {
+    console.error('Error searching articles:', error);
+    return [];
+  }
 }
 
 export default function SearchBar({ onSearch, placeholder = "搜索文章..." }: SearchBarProps) {
@@ -20,7 +61,7 @@ export default function SearchBar({ onSearch, placeholder = "搜索文章..." }:
 
   useEffect(() => {
     if (query.length > 0) {
-      const searchResults = searchArticles(query);
+      const searchResults = searchArticlesLocal(query);
       setResults(searchResults);
       onSearch?.(searchResults);
     } else {
