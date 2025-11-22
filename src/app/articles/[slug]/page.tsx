@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { SupabaseArticleService } from "@/lib/supabaseArticles";
+import { getAllArticles, getArticleBySlug, type Article as LocalArticle } from "@/lib/articles";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import CommentSection from "@/components/CommentSection";
@@ -13,9 +13,47 @@ interface ArticlePageProps {
   };
 }
 
+// 转换日期格式：从"2024年1月15日"转换为ISO字符串
+function parseDate(dateStr: string): string {
+  try {
+    // 处理"2024年1月15日"格式
+    const match = dateStr.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
+    if (match) {
+      const [, year, month, day] = match;
+      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      return date.toISOString();
+    }
+    // 如果无法解析，返回当前日期
+    return new Date().toISOString();
+  } catch {
+    return new Date().toISOString();
+  }
+}
+
+// 转换本地文章格式为页面显示格式
+function convertToDisplayFormat(article: LocalArticle) {
+  const dateISO = parseDate(article.date);
+  return {
+    id: article.id.toString(),
+    title: article.title,
+    excerpt: article.description,
+    content: article.content,
+    slug: article.slug,
+    author: {
+      id: '1',
+      name: article.author,
+      avatar_url: undefined,
+    },
+    tags: article.tags || [],
+    published: true,
+    created_at: dateISO,
+    updated_at: dateISO,
+  };
+}
+
 export async function generateStaticParams() {
   try {
-    const articles = await SupabaseArticleService.getPublishedArticles();
+    const articles = getAllArticles();
     return articles.map((article) => ({
       slug: article.slug,
     }));
@@ -29,36 +67,35 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
   const { slug } = await params;
   
   try {
-    const articles = await SupabaseArticleService.getPublishedArticles();
-    const article = articles.find(a => a.slug === slug);
+    const localArticle = getArticleBySlug(slug);
     
-    if (!article) {
+    if (!localArticle) {
       return {
         title: "文章未找到",
       };
     }
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    const articleUrl = `${baseUrl}/articles/${article.slug}`;
+    const articleUrl = `${baseUrl}/articles/${localArticle.slug}`;
 
     return {
-      title: article.title,
-      description: article.excerpt,
-      keywords: article.tags,
-      authors: [{ name: article.author?.name || '未知作者' }],
+      title: localArticle.title,
+      description: localArticle.description,
+      keywords: localArticle.tags,
+      authors: [{ name: localArticle.author || '未知作者' }],
       openGraph: {
-        title: article.title,
-        description: article.excerpt,
+        title: localArticle.title,
+        description: localArticle.description,
         url: articleUrl,
         type: "article",
-        publishedTime: article.created_at,
-        authors: [article.author?.name || '未知作者'],
-        tags: article.tags,
+        publishedTime: parseDate(localArticle.date),
+        authors: [localArticle.author || '未知作者'],
+        tags: localArticle.tags,
       },
       twitter: {
         card: "summary_large_image",
-        title: article.title,
-        description: article.excerpt,
+        title: localArticle.title,
+        description: localArticle.description,
       },
       alternates: {
         canonical: articleUrl,
@@ -76,22 +113,22 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const { slug } = await params;
   
   try {
-    const articles = await SupabaseArticleService.getPublishedArticles();
-    console.log('Available articles:', articles.map(a => ({ id: a.id, slug: a.slug, title: a.title })));
-    console.log('Looking for slug:', slug);
+    const localArticle = getArticleBySlug(slug);
     
-    const article = articles.find(a => a.slug === slug);
-    
-    if (!article) {
+    if (!localArticle) {
       console.log('Article not found for slug:', slug);
       notFound();
     }
 
-    // 获取相关文章（基于标签）
-    const relatedArticles = articles
-      .filter(a => a.id !== article.id && a.published)
-      .filter(a => a.tags?.some(tag => article.tags?.includes(tag)))
-      .slice(0, 3);
+    const article = convertToDisplayFormat(localArticle);
+    
+    // 获取所有文章用于相关文章推荐
+    const allArticles = getAllArticles();
+    const relatedArticles = allArticles
+      .filter(a => a.id !== localArticle.id)
+      .filter(a => a.tags?.some(tag => localArticle.tags?.some(localTag => localTag.toLowerCase() === tag.toLowerCase())))
+      .slice(0, 3)
+      .map(convertToDisplayFormat);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">

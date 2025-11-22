@@ -3,16 +3,15 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { getAllTags } from "@/lib/articles";
 
 interface TagFilterProps {
+  tags: string[];  // 可用标签列表（从当前页面文章生成）
   selectedTags: string[];
   onTagToggle: (tag: string) => void;
   onClearAll: () => void;
 }
 
-export default function TagFilter({ selectedTags, onTagToggle, onClearAll }: TagFilterProps) {
-  const allTags = getAllTags();
+export default function TagFilter({ tags = [], selectedTags, onTagToggle, onClearAll }: TagFilterProps) {
 
   return (
     <div className="space-y-4">
@@ -33,7 +32,7 @@ export default function TagFilter({ selectedTags, onTagToggle, onClearAll }: Tag
       </div>
       
       <div className="flex flex-wrap gap-2">
-        {allTags.map((tag) => {
+        {tags.map((tag) => {
           const isSelected = selectedTags.includes(tag);
           return (
             <Button

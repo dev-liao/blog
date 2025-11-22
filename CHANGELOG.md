@@ -2,6 +2,156 @@
 
 本文档记录了 Next.js 博客项目的所有重要变更。
 
+## [1.5.0] - 2025-11-22
+
+### 🎉 1.5版本发布 - Markdown 文章管理系统
+
+这是 Next.js 博客项目的第五个重大更新版本，完全移除了 Supabase 依赖，改用本地 Markdown 文件管理系统，实现了静态博客的内容管理方式。
+
+### ✨ 新增功能
+
+#### Markdown 文章管理系统
+- **本地文件存储** - 使用 Markdown 文件管理所有文章内容
+- **分类文件夹** - 按分类（读书、生活、技术、收藏）组织文章
+- **Frontmatter 支持** - 使用 YAML frontmatter 管理文章元数据
+- **自动解析** - 自动读取和解析 Markdown 文件
+- **静态生成** - 支持 Next.js 静态生成优化
+
+#### 分类页面重构
+- **读书页面** (`/reading`) - 显示读书分类的文章
+- **生活页面** (`/life`) - 显示生活分类的文章
+- **技术页面** (`/articles`) - 只显示技术分类的文章
+- **收藏页面** (`/collection`) - 显示收藏分类的文章
+
+#### 标签系统优化
+- **分类标签** - 每个页面自动收集和显示该分类文章的标签
+- **动态标签生成** - 标签从文章 frontmatter 自动提取
+- **标签筛选** - 支持按标签筛选当前分类的文章
+
+### 🔧 技术改进
+
+#### 移除 Supabase 依赖
+- **文章数据源** - 从 Supabase 切换到本地 Markdown 文件
+- **静态加载** - 所有文章内容在构建时静态加载
+- **零外部依赖** - 文章展示不再需要数据库连接
+
+#### Markdown 处理
+- **gray-matter** - 解析 YAML frontmatter
+- **remark** - Markdown 转换为 HTML
+- **remark-gfm** - 支持 GitHub Flavored Markdown
+- **remark-html** - HTML 输出支持
+
+#### 组件优化
+- **ArticleList 组件** - 可复用的文章列表组件
+- **TagFilter 组件** - 支持传入标签列表的动态标签筛选
+- **服务端组件** - 分类页面改为服务端组件优化性能
+
+### 📁 新增文件和目录
+
+#### 内容目录
+```
+content/
+├── reading/          # 读书分类文章
+│   └── example-reading.md
+├── life/             # 生活分类文章
+│   └── example-life.md
+├── tech/             # 技术分类文章
+│   └── example-tech.md
+└── collection/       # 收藏分类文章
+    └── example-collection.md
+```
+
+#### 新增文件
+- `src/lib/markdown.ts` - Markdown 文件读取和解析工具
+- `src/lib/articleLoader.ts` - 文章加载工具（暂未使用）
+- `src/components/ArticleList.tsx` - 文章列表组件
+- `src/app/reading/page.tsx` - 读书页面
+- `src/app/life/page.tsx` - 生活页面
+- `src/app/collection/page.tsx` - 收藏页面
+- `public/icon-*.png` - 分类图标文件
+
+### 🔄 修改的文件
+
+#### 核心文件
+- `src/lib/articles.ts` - 集成 Markdown 文章，清空硬编码文章数据
+- `src/app/articles/page.tsx` - 只显示技术分类文章
+- `src/app/articles/[slug]/page.tsx` - 移除 Supabase 依赖，使用本地数据
+- `src/app/page.tsx` - 更新主页探索区域，添加分类链接
+- `src/components/Header.tsx` - 更新导航栏，添加分类页面链接
+- `src/components/TagFilter.tsx` - 支持传入标签列表参数
+
+### 📝 Markdown 文件格式
+
+每个 Markdown 文件使用以下格式：
+
+```markdown
+---
+title: "文章标题"
+description: "文章描述"
+slug: "article-slug"
+date: "2024年1月20日"
+category: "技术"  # 技术、读书、生活、收藏
+tags: ["标签1", "标签2"]
+author: "作者名"
+featured: false
+published: true
+---
+
+文章内容...
+```
+
+### 🗑️ 移除的内容
+
+- **硬编码文章数据** - 移除了 `src/lib/articles.ts` 中的所有示例文章
+- **Supabase 文章拉取** - 移除了文章详情页的 Supabase 依赖
+- **混合分类显示** - 技术页面不再显示多个技术相关分类
+
+### 🎨 UI/UX 改进
+
+- **分类图标** - 为每个分类添加了图标（读书、生活、技术、收藏）
+- **导航优化** - 更新了导航栏，添加了分类页面链接
+- **标签筛选** - 每个分类页面只显示该分类的标签
+
+### 📊 性能优化
+
+- **静态生成** - 文章内容在构建时静态生成
+- **零运行时依赖** - 文章展示不需要运行时数据库连接
+- **快速加载** - 本地文件读取速度更快
+
+### 🐛 问题修复
+
+- **修复标签筛选** - 修复了标签筛选在不同分类页面显示所有标签的问题
+- **修复文章详情** - 修复了文章详情页面无法找到文章的问题
+- **修复构建错误** - 修复了技术页面的重复 return 语句错误
+
+### 🚀 部署说明
+
+#### 添加文章
+1. 在 `content/` 目录下的对应分类文件夹中创建 `.md` 文件
+2. 填写 frontmatter 元数据
+3. 编写文章内容
+4. 重新构建项目
+
+#### 文件命名
+- 建议使用 kebab-case：`my-article-title.md`
+- 或使用 slug：`article-slug.md`
+
+### 📚 文档更新
+
+- 更新了 README 以反映新的文章管理方式
+- 添加了 Markdown 文件格式说明
+- 更新了项目结构说明
+
+### 🎯 下一步计划
+
+- [ ] 添加 Markdown 编辑器
+- [ ] 实现文章搜索功能
+- [ ] 添加文章分类管理界面
+- [ ] 优化 Markdown 渲染效果
+- [ ] 添加代码高亮支持
+
+---
+
 ## [1.4.0] - 2025-09-19
 
 ### 🎉 1.4版本发布 - Supabase 后端集成

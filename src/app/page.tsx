@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import FavoriteButton from "@/components/FavoriteButton";
 import Link from "next/link";
+import Image from "next/image";
 import { getFeaturedArticles } from "@/lib/articles";
 
 export default function Home() {
@@ -17,7 +18,7 @@ export default function Home() {
             欢迎来到我的博客
           </h2>
           <p className="text-xl text-slate-600 dark:text-slate-300 mb-8 max-w-2xl mx-auto">
-            基于 Next.js 14+、TypeScript、Tailwind CSS 和 shadcn/ui 构建的现代化博客平台
+          读书小记，嵌入式、Linux、AI开发经验和技术总结，徒步、跑步日常生活
           </p>
           <div className="flex gap-4 justify-center">
             <Button size="lg">开始阅读</Button>
@@ -28,7 +29,7 @@ export default function Home() {
         {/* 特色文章 */}
         <section className="py-12">
           <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-8 text-center">
-            精选文章
+            最新内容
           </h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredArticles.map((article) => (
@@ -65,27 +66,31 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 技术栈展示 */}
+        {/* 探索展示 */}
         <section className="py-12 bg-white dark:bg-slate-800 rounded-lg p-8">
           <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-8 text-center">
-            技术栈
+            探索
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
-              { name: "Next.js 15", desc: "React 框架" },
-              { name: "TypeScript", desc: "类型安全" },
-              { name: "Tailwind CSS", desc: "样式框架" },
-              { name: "shadcn/ui", desc: "组件库" },
+              { name: "读书", desc: "随笔小记", icon: "/icon-reading.png", href: "/reading" },
+              { name: "生活", desc: "跑步、徒步、日常分享", icon: "/icon-life.png", href: "/life" },
+              { name: "技术", desc: "嵌入式、AI、Linux技术分享", icon: "/icon-tech.png", href: "/articles" },
+              { name: "收藏", desc: "有趣的网站、页面合集", icon: "/icon-favorite.png", href: "/collection" },
             ].map((tech, i) => (
-              <div key={i} className="text-center">
+              <Link key={i} href={tech.href} className="text-center hover:opacity-80 transition-opacity">
                 <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                  <span className="text-2xl font-bold text-slate-600 dark:text-slate-300">
-                    {tech.name[0]}
-                  </span>
+                  <Image
+                    src={tech.icon}
+                    alt={tech.name}
+                    width={64}
+                    height={64}
+                    className="w-12 h-12 object-contain"
+                  />
                 </div>
                 <h4 className="font-semibold text-slate-900 dark:text-white">{tech.name}</h4>
                 <p className="text-sm text-slate-600 dark:text-slate-400">{tech.desc}</p>
-              </div>
+              </Link>
             ))}
           </div>
         </section>

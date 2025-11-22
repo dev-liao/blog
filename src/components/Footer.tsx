@@ -12,7 +12,6 @@ export default function Footer() {
             </h3>
             <p className="text-slate-600 dark:text-slate-400 mb-4">
               基于 Next.js 14+、TypeScript、Tailwind CSS 和 shadcn/ui 构建的现代化博客平台。
-              分享前端开发经验和技术见解。
             </p>
             <div className="flex gap-4">
               <a href="#" className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
@@ -60,17 +59,17 @@ export default function Footer() {
               技术栈
             </h4>
             <ul className="space-y-2">
-              <li className="text-sm text-slate-600 dark:text-slate-400">Next.js 15</li>
-              <li className="text-sm text-slate-600 dark:text-slate-400">TypeScript</li>
-              <li className="text-sm text-slate-600 dark:text-slate-400">Tailwind CSS</li>
-              <li className="text-sm text-slate-600 dark:text-slate-400">shadcn/ui</li>
+              <li className="text-sm text-slate-600 dark:text-slate-400">AI</li>
+              <li className="text-sm text-slate-600 dark:text-slate-400">Linux</li>
+              <li className="text-sm text-slate-600 dark:text-slate-400">嵌入式</li>
+              <li className="text-sm text-slate-600 dark:text-slate-400">人形机器人</li>
             </ul>
           </div>
         </div>
 
         <div className="border-t border-slate-200 dark:border-slate-700 mt-8 pt-8">
           <div className="text-center text-slate-600 dark:text-slate-400">
-            <p>&copy; 2024 Next.js 博客. 使用 Next.js 和 shadcn/ui 构建.</p>
+            <p>&copy; 2025 Next.js 博客. 使用 Next.js 和 shadcn/ui 构建.</p>
           </div>
         </div>
       </div>

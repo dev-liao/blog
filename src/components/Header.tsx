@@ -20,7 +20,10 @@ export default function Header({ currentPage = "home" }: HeaderProps) {
   
   const navItems = [
     { href: "/", label: "首页", key: "home" },
-    { href: "/articles", label: "文章", key: "articles" },
+    { href: "/reading", label: "读书", key: "reading" },
+    { href: "/life", label: "生活", key: "life" },
+    { href: "/articles", label: "技术", key: "articles" },
+    { href: "/collection", label: "收藏", key: "collection" },
     { href: "/about", label: "关于", key: "about" },
   ];
 
@@ -29,7 +32,7 @@ export default function Header({ currentPage = "home" }: HeaderProps) {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Link href="/" className="text-2xl font-bold text-slate-900 dark:text-white hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
-            Next.js 博客
+            Dev-Liao 博客
           </Link>
           <div className="flex items-center gap-4">
             {/* 搜索框 */}

@@ -15,3 +15,4 @@ UPDATE users SET role = 'admin' WHERE email = 'chn_liao@163.com';
 
 -- 5. 验证更新结果
 SELECT id, email, name, role, created_at FROM users ORDER BY created_at DESC;
+

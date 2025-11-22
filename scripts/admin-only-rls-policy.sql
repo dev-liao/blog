@@ -121,3 +121,4 @@ SELECT schemaname, tablename, policyname, permissive, roles, cmd, qual, with_che
 FROM pg_policies 
 WHERE schemaname = 'public'
 ORDER BY tablename, policyname;
+

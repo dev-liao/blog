@@ -12,3 +12,4 @@ SELECT * FROM users WHERE email = 'chn_liao@163.com';
 
 -- 4. 查看所有剩余用户
 SELECT id, email, name, created_at FROM users ORDER BY created_at DESC;
+
