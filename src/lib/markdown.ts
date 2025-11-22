@@ -28,7 +28,25 @@ interface MarkdownFrontmatter {
 }
 
 // 文章文件路径（相对于项目根目录）
-const contentDir = path.join(process.cwd(), 'content');
+// 动态获取 content 目录路径，避免在模块加载时计算
+function getContentDir(): string {
+  try {
+    // 获取项目根目录（在构建时和运行时都正确）
+    const projectRoot = process.cwd();
+    const contentPath = path.join(projectRoot, 'content');
+    
+    return contentPath;
+  } catch (error) {
+    console.error('Error resolving content directory:', error);
+    // 返回默认路径
+    return path.join(process.cwd(), 'content');
+  }
+}
+
+// 检查是否为服务端环境
+function isServerSide(): boolean {
+  return typeof window === 'undefined' && typeof process !== 'undefined' && !!process.cwd;
+}
 
 // 读取并解析单个 markdown 文件
 function parseMarkdownFile(filePath: string, category: string): Article | null {
@@ -66,13 +84,22 @@ function parseMarkdownFile(filePath: string, category: string): Article | null {
 
 // 读取指定分类目录下的所有 markdown 文件
 function getMarkdownArticles(category: string): Article[] {
-  const categoryDir = path.join(contentDir, category);
-  
-  if (!fs.existsSync(categoryDir)) {
+  // 只在服务端执行文件系统操作
+  if (!isServerSide()) {
+    console.warn('getMarkdownArticles called on client side, returning empty array');
     return [];
   }
-  
+
   try {
+    const contentDir = getContentDir();
+    const categoryDir = path.join(contentDir, category);
+    
+    // 如果目录不存在，静默返回空数组（避免构建错误）
+    if (!fs.existsSync(categoryDir)) {
+      console.warn(`Category directory not found: ${categoryDir}`);
+      return [];
+    }
+    
     const files = fs.readdirSync(categoryDir);
     const markdownFiles = files.filter(file => file.endsWith('.md'));
     
@@ -88,13 +115,19 @@ function getMarkdownArticles(category: string): Article[] {
     
     // 按日期排序（最新的在前）
     articles.sort((a, b) => {
-      const dateA = new Date(a.date.replace('年', '-').replace('月', '-').replace('日', ''));
-      const dateB = new Date(b.date.replace('年', '-').replace('月', '-').replace('日', ''));
-      return dateB.getTime() - dateA.getTime();
+      try {
+        const dateA = new Date(a.date.replace('年', '-').replace('月', '-').replace('日', ''));
+        const dateB = new Date(b.date.replace('年', '-').replace('月', '-').replace('日', ''));
+        return dateB.getTime() - dateA.getTime();
+      } catch {
+        // 如果日期解析失败，保持原有顺序
+        return 0;
+      }
     });
     
     return articles;
   } catch (error) {
+    // 在构建时遇到错误时，返回空数组而不是抛出错误
     console.error(`Error reading markdown articles from ${category}:`, error);
     return [];
   }
@@ -102,12 +135,21 @@ function getMarkdownArticles(category: string): Article[] {
 
 // 获取所有分类的 markdown 文章
 export function getAllMarkdownArticles(): Article[] {
+  // 只在服务端执行
+  if (!isServerSide()) {
+    return [];
+  }
+
   const categories = ['reading', 'life', 'tech', 'collection'];
   const allArticles: Article[] = [];
   
-  for (const category of categories) {
-    const articles = getMarkdownArticles(category);
-    allArticles.push(...articles);
+  try {
+    for (const category of categories) {
+      const articles = getMarkdownArticles(category);
+      allArticles.push(...articles);
+    }
+  } catch (error) {
+    console.error('Error getting all markdown articles:', error);
   }
   
   return allArticles;
@@ -115,6 +157,11 @@ export function getAllMarkdownArticles(): Article[] {
 
 // 根据分类获取 markdown 文章
 export function getMarkdownArticlesByCategory(category: string): Article[] {
+  // 只在服务端执行
+  if (!isServerSide()) {
+    return [];
+  }
+
   const categoryMap: Record<string, string> = {
     '读书': 'reading',
     '生活': 'life',
@@ -122,8 +169,13 @@ export function getMarkdownArticlesByCategory(category: string): Article[] {
     '收藏': 'collection',
   };
   
-  const dirName = categoryMap[category] || category.toLowerCase();
-  return getMarkdownArticles(dirName);
+  try {
+    const dirName = categoryMap[category] || category.toLowerCase();
+    return getMarkdownArticles(dirName);
+  } catch (error) {
+    console.error(`Error getting markdown articles for category ${category}:`, error);
+    return [];
+  }
 }
 
 // 将 Markdown 内容转换为 HTML
@@ -138,14 +190,23 @@ export async function markdownToHtml(markdown: string): Promise<string> {
 
 // 根据 slug 获取单个 markdown 文章
 export function getMarkdownArticleBySlug(slug: string): Article | null {
-  const categories = ['reading', 'life', 'tech', 'collection'];
-  
-  for (const category of categories) {
-    const articles = getMarkdownArticles(category);
-    const article = articles.find(a => a.slug === slug);
-    if (article) {
-      return article;
+  // 只在服务端执行
+  if (!isServerSide()) {
+    return null;
+  }
+
+  try {
+    const categories = ['reading', 'life', 'tech', 'collection'];
+    
+    for (const category of categories) {
+      const articles = getMarkdownArticles(category);
+      const article = articles.find(a => a.slug === slug);
+      if (article) {
+        return article;
+      }
     }
+  } catch (error) {
+    console.error(`Error getting markdown article by slug ${slug}:`, error);
   }
   
   return null;
