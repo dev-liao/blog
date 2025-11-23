@@ -1,6 +1,34 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Footer() {
+  const socialLinks = [
+    {
+      name: "GitHub",
+      href: "#",
+      icon: "/icon-github.png",
+      alt: "GitHub"
+    },
+    {
+      name: "RedNote",
+      href: "#",
+      icon: "/icon-rednote.png",
+      alt: "RedNote"
+    },
+    {
+      name: "Weibo",
+      href: "#",
+      icon: "/icon-weibo.png",
+      alt: "Weibo"
+    },
+    {
+      name: "bilibili",
+      href: "#",
+      icon: "/icon-bilibili.png",
+      alt: "bilibili"
+    }
+  ];
+
   return (
     <footer className="border-t bg-white dark:bg-slate-900 mt-20">
       <div className="container mx-auto px-4 py-8">
@@ -8,24 +36,27 @@ export default function Footer() {
           {/* 网站信息 */}
           <div className="md:col-span-2">
             <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
-              Next.js 博客
+              最新动态
             </h3>
             <p className="text-slate-600 dark:text-slate-400 mb-4">
-              基于 Next.js 14+、TypeScript、Tailwind CSS 和 shadcn/ui 构建的现代化博客平台。
             </p>
             <div className="flex gap-4">
-              <a href="#" className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
-                GitHub
-              </a>
-              <a href="#" className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
-                Twitter
-              </a>
-              <a href="#" className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
-                LinkedIn
-              </a>
-              <a href="/feed.xml" className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
-                RSS
-              </a>
+              {socialLinks.map((link) => (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                  aria-label={link.alt}
+                >
+                  <Image
+                    src={link.icon}
+                    alt={link.alt}
+                    width={24}
+                    height={24}
+                    className="w-6 h-6 opacity-70 hover:opacity-100 transition-opacity"
+                  />
+                </a>
+              ))}
             </div>
           </div>
 

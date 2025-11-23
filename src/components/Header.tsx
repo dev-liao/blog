@@ -1,6 +1,7 @@
 'use client';
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import SearchBar from "./SearchBar";
 import ThemeToggle from "./ThemeToggle";
 import UserMenu from "./UserMenu";
@@ -10,13 +11,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 import { LogIn } from "lucide-react";
 
-interface HeaderProps {
-  currentPage?: string;
-}
-
-export default function Header({ currentPage = "home" }: HeaderProps) {
+export default function Header() {
   const { isAuthenticated } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const pathname = usePathname();
   
   const navItems = [
     { href: "/", label: "首页", key: "home" },
@@ -26,6 +24,14 @@ export default function Header({ currentPage = "home" }: HeaderProps) {
     { href: "/collection", label: "收藏", key: "collection" },
     { href: "/about", label: "关于", key: "about" },
   ];
+
+  // 根据当前路径自动确定当前页面
+  const getCurrentPage = () => {
+    const currentItem = navItems.find(item => item.href === pathname);
+    return currentItem?.key || "home";
+  };
+
+  const currentPage = getCurrentPage();
 
   return (
     <nav className="border-b bg-white/80 backdrop-blur-sm dark:bg-slate-900/80 sticky top-0 z-50">
