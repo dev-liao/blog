@@ -5,25 +5,25 @@ export default function Footer() {
   const socialLinks = [
     {
       name: "GitHub",
-      href: "#",
+      href: "https://github.com/dev-liao",
       icon: "/icon-github.png",
       alt: "GitHub"
     },
     {
       name: "RedNote",
-      href: "#",
+      href: "https://www.xiaohongshu.com/user/profile/645e34ad0000000029017597",
       icon: "/icon-rednote.png",
       alt: "RedNote"
     },
     {
       name: "Weibo",
-      href: "#",
+      href: "https://weibo.com/u/6155830199",
       icon: "/icon-weibo.png",
       alt: "Weibo"
     },
     {
       name: "bilibili",
-      href: "#",
+      href: "https://space.bilibili.com/3546565104896970",
       icon: "/icon-bilibili.png",
       alt: "bilibili"
     }
@@ -45,6 +45,8 @@ export default function Footer() {
                 <a
                   key={link.name}
                   href={link.href}
+                  target={link.href.startsWith('http') ? '_blank' : undefined}
+                  rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
                   className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                   aria-label={link.alt}
                 >
