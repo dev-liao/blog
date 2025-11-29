@@ -4,6 +4,30 @@ import { useEffect } from 'react';
 
 export default function ArticleImageHandler() {
   useEffect(() => {
+    // 创建一个符合 Event 接口的模拟事件对象
+    const createEvent = (target: HTMLImageElement, type: string): Event => {
+      return {
+        target,
+        currentTarget: target,
+        bubbles: false,
+        cancelable: false,
+        composed: false,
+        defaultPrevented: false,
+        eventPhase: 0,
+        isTrusted: false,
+        timeStamp: Date.now(),
+        type,
+        cancelBubble: false,
+        returnValue: true,
+        srcElement: target,
+        preventDefault: () => {},
+        stopPropagation: () => {},
+        stopImmediatePropagation: () => {},
+        initEvent: () => {},
+        composedPath: () => [],
+      } as Event;
+    };
+
     // 处理图片加载错误
     const handleImageError = (e: Event) => {
       const img = e.target as HTMLImageElement;
@@ -66,9 +90,9 @@ export default function ArticleImageHandler() {
       // 如果图片已经加载完成
       if (imageElement.complete) {
         if (imageElement.naturalHeight === 0) {
-          handleImageError({ target: imageElement } as Event);
+          handleImageError(createEvent(imageElement, 'error'));
         } else {
-          handleImageLoad({ target: imageElement } as Event);
+          handleImageLoad(createEvent(imageElement, 'load'));
         }
       }
     });
