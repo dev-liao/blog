@@ -4,33 +4,8 @@ import { useEffect } from 'react';
 
 export default function ArticleImageHandler() {
   useEffect(() => {
-    // 创建一个符合 Event 接口的模拟事件对象
-    const createEvent = (target: HTMLImageElement, type: string): Event => {
-      return {
-        target,
-        currentTarget: target,
-        bubbles: false,
-        cancelable: false,
-        composed: false,
-        defaultPrevented: false,
-        eventPhase: 0,
-        isTrusted: false,
-        timeStamp: Date.now(),
-        type,
-        cancelBubble: false,
-        returnValue: true,
-        srcElement: target,
-        preventDefault: () => {},
-        stopPropagation: () => {},
-        stopImmediatePropagation: () => {},
-        initEvent: () => {},
-        composedPath: () => [],
-      } as Event;
-    };
-
-    // 处理图片加载错误
-    const handleImageError = (e: Event) => {
-      const img = e.target as HTMLImageElement;
+    // 处理图片加载错误的内部函数
+    const processImageError = (img: HTMLImageElement) => {
       console.error('Image failed to load:', img.src);
       
       // 如果是代理 URL，尝试直接使用原始 Gitee URL
@@ -52,9 +27,8 @@ export default function ArticleImageHandler() {
       img.alt = '图片加载失败: ' + (img.alt || '');
     };
 
-    // 处理图片加载成功
-    const handleImageLoad = (e: Event) => {
-      const img = e.target as HTMLImageElement;
+    // 处理图片加载成功的内部函数
+    const processImageLoad = (img: HTMLImageElement) => {
       console.log('Image loaded successfully:', img.src);
       // 确保图片可见
       img.style.display = 'block';
@@ -66,6 +40,18 @@ export default function ArticleImageHandler() {
         img.style.height = 'auto';
         img.style.maxWidth = '100%';
       }
+    };
+
+    // 处理图片加载错误（事件处理器）
+    const handleImageError = (e: Event) => {
+      const img = e.target as HTMLImageElement;
+      processImageError(img);
+    };
+
+    // 处理图片加载成功（事件处理器）
+    const handleImageLoad = (e: Event) => {
+      const img = e.target as HTMLImageElement;
+      processImageLoad(img);
     };
 
     // 为所有图片添加事件监听器
@@ -90,9 +76,9 @@ export default function ArticleImageHandler() {
       // 如果图片已经加载完成
       if (imageElement.complete) {
         if (imageElement.naturalHeight === 0) {
-          handleImageError(createEvent(imageElement, 'error'));
+          processImageError(imageElement);
         } else {
-          handleImageLoad(createEvent(imageElement, 'load'));
+          processImageLoad(imageElement);
         }
       }
     });
