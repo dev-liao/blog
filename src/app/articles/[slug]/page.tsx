@@ -6,6 +6,8 @@ import CommentSection from "@/components/CommentSection";
 import Link from "next/link";
 import { ArrowLeft, Calendar, User, Tag } from "lucide-react";
 import type { Metadata } from "next";
+import { markdownToHtml } from "@/lib/markdown";
+import ArticleImageHandler from "@/components/ArticleImageHandler";
 
 interface ArticlePageProps {
   params: Promise<{
@@ -122,6 +124,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
     const article = convertToDisplayFormat(localArticle);
     
+    // 将 markdown 内容转换为 HTML（包括图片）
+    let htmlContent = await markdownToHtml(article.content);
+    
+    // 确保 HTML 内容不为空
+    if (!htmlContent || htmlContent.trim().length === 0) {
+      htmlContent = '<p>内容加载中...</p>';
+    }
+    
     // 获取所有文章用于相关文章推荐
     const allArticles = getAllArticles();
     const relatedArticles = allArticles
@@ -192,10 +202,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           {/* 文章内容 */}
           <Card className="mb-8">
             <CardContent className="prose prose-slate dark:prose-invert max-w-none">
+              <ArticleImageHandler />
               <div 
                 className="article-content"
                 dangerouslySetInnerHTML={{ 
-                  __html: article.content.replace(/\n/g, '<br>').replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>').replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/^### (.*$)/gim, '<h3>$1</h3>').replace(/^## (.*$)/gim, '<h2>$1</h2>').replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                  __html: htmlContent
                 }}
               />
             </CardContent>

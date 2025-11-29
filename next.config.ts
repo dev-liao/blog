@@ -3,7 +3,14 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   trailingSlash: true,
   images: {
-    unoptimized: true
+    unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'gitee.com',
+        pathname: '/**',
+      },
+    ],
   },
   webpack: (config, { isServer }) => {
     // 在客户端打包时，将 Node.js 内置模块替换为空对象

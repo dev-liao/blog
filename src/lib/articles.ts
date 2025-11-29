@@ -40,6 +40,41 @@ export function getFeaturedArticles(): Article[] {
   return allArticles.filter(article => article.featured);
 }
 
+// 解析日期字符串为 Date 对象（支持多种格式）
+function parseDate(dateStr: string): Date {
+  try {
+    // 处理"2024年1月15日"格式
+    const match = dateStr.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
+    if (match) {
+      const [, year, month, day] = match;
+      return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    }
+    // 尝试直接解析 ISO 格式或其他标准格式
+    const date = new Date(dateStr);
+    if (!isNaN(date.getTime())) {
+      return date;
+    }
+  } catch {
+    // 如果解析失败，返回当前日期
+  }
+  return new Date();
+}
+
+// 获取最新文章（按日期排序）
+export function getLatestArticles(limit: number = 12): Article[] {
+  const allArticles = getAllArticles();
+  
+  // 按日期排序（最新的在前）
+  const sortedArticles = [...allArticles].sort((a, b) => {
+    const dateA = parseDate(a.date);
+    const dateB = parseDate(b.date);
+    return dateB.getTime() - dateA.getTime();
+  });
+  
+  // 返回指定数量的最新文章
+  return sortedArticles.slice(0, limit);
+}
+
 export function getArticlesByCategory(category: string): Article[] {
   let categoryArticles = articles.filter(article => article.category === category);
   

@@ -182,12 +182,83 @@ export function getMarkdownArticlesByCategory(category: string): Article[] {
 
 // 将 Markdown 内容转换为 HTML
 export async function markdownToHtml(markdown: string): Promise<string> {
-  const result = await remark()
-    .use(remarkGfm)
-    .use(remarkHtml)
-    .process(markdown);
-  
-  return result.toString();
+  try {
+    const result = await remark()
+      .use(remarkGfm)
+      .use(remarkHtml, { sanitize: false })
+      .process(markdown);
+    
+    let html = result.toString();
+    
+    // remark-html 会将图片转换为 <p><img src="..." alt="..."></p>
+    // 我们需要确保所有 img 标签都有正确的属性
+    html = html.replace(
+      /<img([^>]*?)>/gi,
+      (match: string, attrs: string) => {
+        // 提取 src 属性
+        const srcMatch = attrs.match(/src=["']([^"']+)["']/i);
+        if (!srcMatch) {
+          return match; // 如果没有 src，返回原样
+        }
+        
+        let src = srcMatch[1];
+        
+        // 如果是 Gitee 图片，使用代理 API 绕过 CORS 和 Referer 限制
+        if (src.includes('gitee.com')) {
+          // 确保 URL 正确编码（只编码一次）
+          const encodedUrl = encodeURIComponent(src);
+          src = `/api/image-proxy?url=${encodedUrl}`;
+        }
+        
+        // 转义 src 中的特殊字符（虽然 URL 通常不需要，但为了安全）
+        const safeSrc = src.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        
+        let newAttrs = attrs;
+        
+        // 确保有 alt 属性
+        if (!/alt=["']/i.test(newAttrs)) {
+          // 尝试从现有属性中提取 alt 文本
+          const altMatch = match.match(/alt=["']([^"']*)["']/i);
+          const alt = altMatch ? altMatch[1] : '';
+          const safeAlt = alt.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+          newAttrs = `alt="${safeAlt}" ${newAttrs}`;
+        }
+        
+        // 添加 loading="lazy"
+        if (!/loading=["']/i.test(newAttrs)) {
+          newAttrs = `${newAttrs} loading="lazy"`;
+        }
+        
+        // 添加 referrerPolicy 以解决 Gitee 的 Referer 限制
+        if (safeSrc.includes('gitee.com') && !/referrerpolicy=["']/i.test(newAttrs)) {
+          newAttrs = `${newAttrs} referrerPolicy="no-referrer"`;
+        }
+        
+        // 添加 class
+        if (!/class=["']/i.test(newAttrs)) {
+          newAttrs = `${newAttrs} class="article-image"`;
+        } else {
+          newAttrs = newAttrs.replace(/class=["']([^"']*)["']/i, (m: string, classes: string) => {
+            if (!classes.includes('article-image')) {
+              return `class="${classes} article-image"`;
+            }
+            return m;
+          });
+        }
+        
+        // 确保 src 属性是最新的（使用转义后的 URL）
+        newAttrs = newAttrs.replace(/src=["'][^"']*["']/i, `src="${safeSrc}"`);
+        
+        return `<img ${newAttrs.trim()}>`;
+      }
+    );
+    
+    return html;
+  } catch (error) {
+    console.error('Error converting markdown to HTML:', error);
+    // 如果转换失败，返回原始 markdown（转义 HTML）
+    return markdown.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
 }
 
 // 根据 slug 获取单个 markdown 文章

@@ -3,10 +3,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import FavoriteButton from "@/components/FavoriteButton";
 import Link from "next/link";
 import Image from "next/image";
-import { getFeaturedArticles } from "@/lib/articles";
+import { getLatestArticles } from "@/lib/articles";
 
 export default function Home() {
-  const featuredArticles = getFeaturedArticles();
+  const latestArticles = getLatestArticles(12);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
@@ -32,7 +32,7 @@ export default function Home() {
             最新内容
           </h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredArticles.map((article) => (
+            {latestArticles.map((article) => (
               <Link key={article.id} href={`/articles/${article.slug}`}>
                 <Card className="hover:shadow-lg transition-shadow cursor-pointer">
                   <CardHeader>
