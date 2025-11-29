@@ -69,10 +69,11 @@ export async function GET(request: NextRequest) {
         'Cache-Control': 'public, max-age=3600, s-maxage=3600',
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error proxying image:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to proxy image', details: error.message },
+      { error: 'Failed to proxy image', details: errorMessage },
       { status: 500 }
     );
   }
