@@ -69,7 +69,16 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
   const { slug } = await params;
   
   try {
-    const localArticle = getArticleBySlug(slug);
+    // 解码 URL 编码的 slug（处理 %20 等编码字符）
+    const decodedSlug = decodeURIComponent(slug);
+    
+    // 先尝试使用解码后的 slug
+    let localArticle = getArticleBySlug(decodedSlug);
+    
+    // 如果没找到，尝试使用原始 slug（可能已经是解码后的）
+    if (!localArticle) {
+      localArticle = getArticleBySlug(slug);
+    }
     
     if (!localArticle) {
       return {
@@ -115,10 +124,19 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const { slug } = await params;
   
   try {
-    const localArticle = getArticleBySlug(slug);
+    // 解码 URL 编码的 slug（处理 %20 等编码字符）
+    const decodedSlug = decodeURIComponent(slug);
+    
+    // 先尝试使用解码后的 slug
+    let localArticle = getArticleBySlug(decodedSlug);
+    
+    // 如果没找到，尝试使用原始 slug（可能已经是解码后的）
+    if (!localArticle) {
+      localArticle = getArticleBySlug(slug);
+    }
     
     if (!localArticle) {
-      console.log('Article not found for slug:', slug);
+      console.log('Article not found for slug:', slug, 'decoded:', decodedSlug);
       notFound();
     }
 

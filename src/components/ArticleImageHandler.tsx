@@ -8,20 +8,35 @@ export default function ArticleImageHandler() {
     const processImageError = (img: HTMLImageElement) => {
       console.error('Image failed to load:', img.src);
       
-      // 如果是代理 URL，尝试直接使用原始 Gitee URL
+      // 如果是代理 URL，尝试使用 data-original-url 回退到原始 URL
       if (img.src.includes('/api/image-proxy')) {
-        const urlParams = new URLSearchParams(img.src.split('?')[1]);
-        const originalUrl = urlParams.get('url');
+        const originalUrl = img.getAttribute('data-original-url');
         if (originalUrl) {
-          console.log('Retrying with original URL:', originalUrl);
+          console.log('Proxy failed, retrying with original URL:', originalUrl);
           // 设置 referrerPolicy 后重试
           img.referrerPolicy = 'no-referrer';
+          img.crossOrigin = 'anonymous';
           img.src = originalUrl;
           return;
         }
+        
+        // 如果没有 data-original-url，尝试从 URL 参数中提取
+        try {
+          const urlParams = new URLSearchParams(img.src.split('?')[1]);
+          const urlFromParams = urlParams.get('url');
+          if (urlFromParams) {
+            console.log('Retrying with URL from params:', urlFromParams);
+            img.referrerPolicy = 'no-referrer';
+            img.crossOrigin = 'anonymous';
+            img.src = urlFromParams;
+            return;
+          }
+        } catch (e) {
+          console.error('Error parsing URL params:', e);
+        }
       }
       
-      // 添加错误占位符样式
+      // 如果所有尝试都失败，添加错误占位符样式
       img.style.border = '2px dashed #ccc';
       img.style.backgroundColor = '#f5f5f5';
       img.alt = '图片加载失败: ' + (img.alt || '');
@@ -59,15 +74,30 @@ export default function ArticleImageHandler() {
     images.forEach((img) => {
       const imageElement = img as HTMLImageElement;
       
-      // 如果是 Gitee 图片，设置 referrerPolicy
-      if (imageElement.src.includes('gitee.com')) {
-        imageElement.referrerPolicy = 'no-referrer';
-        // 如果图片加载失败，尝试重新加载（可能是 Referer 问题）
-        if (!imageElement.complete || imageElement.naturalHeight === 0) {
-          const originalSrc = imageElement.src;
-          // 尝试添加时间戳避免缓存
-          imageElement.src = originalSrc + (originalSrc.includes('?') ? '&' : '?') + '_t=' + Date.now();
+      // 如果是代理 URL，确保有 data-original-url 属性
+      if (imageElement.src.includes('/api/image-proxy')) {
+        const originalUrl = imageElement.getAttribute('data-original-url');
+        if (!originalUrl) {
+          // 尝试从 URL 参数中提取并保存
+          try {
+            const urlParams = new URLSearchParams(imageElement.src.split('?')[1]);
+            const urlFromParams = urlParams.get('url');
+            if (urlFromParams) {
+              imageElement.setAttribute('data-original-url', urlFromParams);
+            }
+          } catch (e) {
+            console.error('Error extracting original URL:', e);
+          }
         }
+        // 设置 referrerPolicy 和 crossOrigin
+        imageElement.referrerPolicy = 'no-referrer';
+        imageElement.crossOrigin = 'anonymous';
+      } else if (imageElement.src.includes('gitee.com')) {
+        // 如果是直接的 Gitee 图片，设置 referrerPolicy
+        imageElement.referrerPolicy = 'no-referrer';
+        imageElement.crossOrigin = 'anonymous';
+        // 保存原始 URL
+        imageElement.setAttribute('data-original-url', imageElement.src);
       }
       
       imageElement.addEventListener('error', handleImageError);

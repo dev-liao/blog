@@ -202,6 +202,7 @@ export async function markdownToHtml(markdown: string): Promise<string> {
         }
         
         let src = srcMatch[1];
+        const originalSrc = src; // 保存原始 URL 用于回退
         
         // 如果是 Gitee 图片，使用代理 API 绕过 CORS 和 Referer 限制
         if (src.includes('gitee.com')) {
@@ -212,6 +213,7 @@ export async function markdownToHtml(markdown: string): Promise<string> {
         
         // 转义 src 中的特殊字符（虽然 URL 通常不需要，但为了安全）
         const safeSrc = src.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        const safeOriginalSrc = originalSrc.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         
         let newAttrs = attrs;
         
@@ -229,9 +231,14 @@ export async function markdownToHtml(markdown: string): Promise<string> {
           newAttrs = `${newAttrs} loading="lazy"`;
         }
         
-        // 添加 referrerPolicy 以解决 Gitee 的 Referer 限制
-        if (safeSrc.includes('gitee.com') && !/referrerpolicy=["']/i.test(newAttrs)) {
-          newAttrs = `${newAttrs} referrerPolicy="no-referrer"`;
+        // 如果是 Gitee 图片，添加 data-original-url 属性用于回退，并设置 referrerPolicy
+        if (originalSrc.includes('gitee.com')) {
+          if (!/data-original-url=["']/i.test(newAttrs)) {
+            newAttrs = `${newAttrs} data-original-url="${safeOriginalSrc}"`;
+          }
+          if (!/referrerpolicy=["']/i.test(newAttrs)) {
+            newAttrs = `${newAttrs} referrerPolicy="no-referrer"`;
+          }
         }
         
         // 添加 class
