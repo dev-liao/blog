@@ -262,7 +262,6 @@ export async function markdownToHtml(markdown: string): Promise<string> {
     
     // 为表格添加可滚动的包装容器
     // 使用更健壮的方法处理表格（包括嵌套情况）
-    let tableIndex = 0;
     html = html.replace(
       /<table([^>]*?)>([\s\S]*?)<\/table>/gi,
       (match: string, tableAttrs: string, tableContent: string) => {
@@ -292,7 +291,6 @@ export async function markdownToHtml(markdown: string): Promise<string> {
           tableClass = ' ' + tableClass;
         }
         
-        tableIndex++;
         return `<div class="${wrapperClass}"><table${tableClass}>${tableContent}</table></div>`;
       }
     );
