@@ -358,23 +358,71 @@
     @apply text-blue-800 dark:text-blue-300;
   }
 
-  /* Markdown 表格样式 */
-  .article-content table,
-  .prose table {
-    @apply w-full border-collapse my-4;
-    display: table !important;
+  /* Markdown 表格包装器 - 支持横向滚动 */
+  .article-content .table-wrapper,
+  .prose .table-wrapper {
+    @apply block overflow-x-auto my-4;
+    width: 100% !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgb(148 163 184) rgb(241 245 249);
   }
 
+  /* 自定义滚动条样式 */
+  .article-content .table-wrapper::-webkit-scrollbar,
+  .prose .table-wrapper::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .article-content .table-wrapper::-webkit-scrollbar-track,
+  .prose .table-wrapper::-webkit-scrollbar-track {
+    @apply bg-slate-100 dark:bg-slate-800 rounded;
+  }
+
+  .article-content .table-wrapper::-webkit-scrollbar-thumb,
+  .prose .table-wrapper::-webkit-scrollbar-thumb {
+    @apply bg-slate-400 dark:bg-slate-600 rounded;
+  }
+
+  .article-content .table-wrapper::-webkit-scrollbar-thumb:hover,
+  .prose .table-wrapper::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-500 dark:bg-slate-500;
+  }
+
+  /* Markdown 表格样式 */
+  .article-content table,
+  .prose table,
+  .article-content .article-table,
+  .prose .article-table {
+    @apply border-collapse;
+    display: table !important;
+    width: 100% !important;
+    min-width: max-content !important;
+    table-layout: auto !important;
+    margin: 0 !important;
+  }
+
+  /* 表格单元格样式 */
   .article-content th,
   .article-content td,
   .prose th,
   .prose td {
     @apply border border-slate-300 dark:border-slate-600 px-4 py-2;
+    white-space: nowrap !important;
+  }
+
+  /* 最后一列（通常是描述性内容）允许换行 */
+  .article-content td:last-child,
+  .prose td:last-child {
+    white-space: normal !important;
+    min-width: 200px !important;
+    max-width: 400px !important;
   }
 
   .article-content th,
   .prose th {
     @apply bg-slate-100 dark:bg-slate-800 font-semibold;
+    white-space: nowrap !important;
   }
 
   /* Markdown 水平线样式 */

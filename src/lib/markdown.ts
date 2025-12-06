@@ -260,6 +260,43 @@ export async function markdownToHtml(markdown: string): Promise<string> {
       }
     );
     
+    // 为表格添加可滚动的包装容器
+    // 使用更健壮的方法处理表格（包括嵌套情况）
+    let tableIndex = 0;
+    html = html.replace(
+      /<table([^>]*?)>([\s\S]*?)<\/table>/gi,
+      (match: string, tableAttrs: string, tableContent: string) => {
+        // 检查是否已经在包装容器内
+        if (match.includes('table-wrapper')) {
+          return match;
+        }
+        
+        // 添加包装容器和表格类名
+        const wrapperClass = 'table-wrapper';
+        let tableClass = tableAttrs.trim();
+        
+        // 处理 class 属性
+        if (tableClass.includes('class=')) {
+          tableClass = tableClass.replace(/class=["']([^"']*)["']/i, (m: string, classes: string) => {
+            const newClasses = classes.includes('article-table') 
+              ? classes 
+              : `${classes} article-table`;
+            return `class="${newClasses}"`;
+          });
+        } else {
+          tableClass = `${tableClass} class="article-table"`.trim();
+        }
+        
+        // 如果 tableClass 为空，确保有空格
+        if (tableClass && !tableClass.startsWith(' ')) {
+          tableClass = ' ' + tableClass;
+        }
+        
+        tableIndex++;
+        return `<div class="${wrapperClass}"><table${tableClass}>${tableContent}</table></div>`;
+      }
+    );
+    
     return html;
   } catch (error) {
     console.error('Error converting markdown to HTML:', error);
